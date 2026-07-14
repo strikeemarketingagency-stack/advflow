@@ -1,26 +1,191 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* warm near-black ramp — dark surfaces (nav flutuante, painel de login) and primary text */
+  --color-navy-950: #17150f;
+  --color-navy-900: #201f1d;
+  --color-navy-800: #34322f;
+  --color-navy-700: #4a4743;
+  --color-navy-600: #625f5a;
+  --color-navy-500: #7d7979;
+  --color-navy-100: #eae7e7;
+  --color-navy-50: #f8f4f4;
+
+  /* muted bronze secondary — currently unused but kept in the warm family */
+  --color-petroleum-900: #3a2a10;
+  --color-petroleum-800: #513a17;
+  --color-petroleum-700: #6b4d20;
+  --color-petroleum-600: #866230;
+  --color-petroleum-500: #a17e46;
+  --color-petroleum-100: #ede2cf;
+  --color-petroleum-50: #f7f1e6;
+
+  /* warm cream backgrounds */
+  --color-ice-50: #f3f2f2;
+  --color-ice-100: #eae9e9;
+  --color-ice-200: #e2dfdd;
+
+  /* warm neutral dividers/borders */
+  --color-mist-50: #f6f4f3;
+  --color-mist-100: #e3e0dd;
+  --color-mist-200: #d5d1cd;
+  --color-mist-300: #c2bdb8;
+  --color-mist-400: #aca6a0;
+
+  /* warm ink text ramp */
+  --color-graphite-900: #201f1d;
+  --color-graphite-800: #3a3735;
+  --color-graphite-700: #55514d;
+  --color-graphite-600: #6b6763;
+  --color-graphite-500: #7d7979;
+  --color-graphite-400: #9b9797;
+  --color-graphite-300: #bab6b6;
+  --color-graphite-200: #d7d3d3;
+  --color-graphite-100: #eae7e7;
+
+  /* gold accent ramp */
+  --color-gold-600: #8a6423;
+  --color-gold-500: #b68235;
+  --color-gold-400: #c28d41;
+  --color-gold-300: #e1ad66;
+  --color-gold-200: #facb8d;
+  --color-gold-100: #ffe3bf;
+  --color-gold-50: #fff3e4;
+
+  --background: var(--color-ice-50);
+  --foreground: var(--color-graphite-900);
 }
 
 @theme inline {
+  --color-navy-950: var(--color-navy-950);
+  --color-navy-900: var(--color-navy-900);
+  --color-navy-800: var(--color-navy-800);
+  --color-navy-700: var(--color-navy-700);
+  --color-navy-600: var(--color-navy-600);
+  --color-navy-500: var(--color-navy-500);
+  --color-navy-100: var(--color-navy-100);
+  --color-navy-50: var(--color-navy-50);
+
+  --color-petroleum-900: var(--color-petroleum-900);
+  --color-petroleum-800: var(--color-petroleum-800);
+  --color-petroleum-700: var(--color-petroleum-700);
+  --color-petroleum-600: var(--color-petroleum-600);
+  --color-petroleum-500: var(--color-petroleum-500);
+  --color-petroleum-100: var(--color-petroleum-100);
+  --color-petroleum-50: var(--color-petroleum-50);
+
+  --color-ice-50: var(--color-ice-50);
+  --color-ice-100: var(--color-ice-100);
+  --color-ice-200: var(--color-ice-200);
+
+  --color-mist-50: var(--color-mist-50);
+  --color-mist-100: var(--color-mist-100);
+  --color-mist-200: var(--color-mist-200);
+  --color-mist-300: var(--color-mist-300);
+  --color-mist-400: var(--color-mist-400);
+
+  --color-graphite-900: var(--color-graphite-900);
+  --color-graphite-800: var(--color-graphite-800);
+  --color-graphite-700: var(--color-graphite-700);
+  --color-graphite-600: var(--color-graphite-600);
+  --color-graphite-500: var(--color-graphite-500);
+  --color-graphite-400: var(--color-graphite-400);
+  --color-graphite-300: var(--color-graphite-300);
+  --color-graphite-200: var(--color-graphite-200);
+  --color-graphite-100: var(--color-graphite-100);
+
+  --color-gold-600: var(--color-gold-600);
+  --color-gold-500: var(--color-gold-500);
+  --color-gold-400: var(--color-gold-400);
+  --color-gold-300: var(--color-gold-300);
+  --color-gold-200: var(--color-gold-200);
+  --color-gold-100: var(--color-gold-100);
+  --color-gold-50: var(--color-gold-50);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Typographic rhythm */
+  --text-xs--line-height: 1.5;
+  --text-xs--letter-spacing: 0.02em;
+  --text-sm--line-height: 1.6;
+  --text-sm--letter-spacing: 0em;
+  --text-base--line-height: 1.6;
+  --text-base--letter-spacing: 0em;
+  --text-lg--line-height: 1.4;
+  --text-lg--letter-spacing: -0.01em;
+  --text-xl--line-height: 1.3;
+  --text-xl--letter-spacing: -0.015em;
+  --text-2xl--line-height: 1.2;
+  --text-2xl--letter-spacing: -0.02em;
+  --text-3xl--line-height: 1.15;
+  --text-3xl--letter-spacing: -0.02em;
+
+  --text-display: 2rem;
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.01em;
+
+  /* Elevation — contact shadow layered with a translucent gold glow */
+  --shadow-xs: 0 1px 2px rgba(32, 31, 29, 0.06);
+  --shadow-soft: 0 1px 2px rgba(32, 31, 29, 0.05), 0 8px 20px rgba(32, 31, 29, 0.07);
+  --shadow-hover: 0 2px 6px rgba(32, 31, 29, 0.08), 0 0 0 1px rgba(182, 130, 53, 0.12), 0 12px 32px -8px rgba(182, 130, 53, 0.28);
+  --shadow-card: 0 2px 6px rgba(32, 31, 29, 0.06), 0 0 0 1px rgba(182, 130, 53, 0.06), 0 16px 36px -12px rgba(182, 130, 53, 0.18);
+  --shadow-elevated: 0 6px 16px rgba(32, 31, 29, 0.10), 0 0 0 1px rgba(182, 130, 53, 0.14), 0 32px 64px -16px rgba(182, 130, 53, 0.32);
+  --shadow-floating: 0 10px 24px rgba(23, 21, 15, 0.28), 0 0 0 1px rgba(182, 130, 53, 0.25), 0 48px 96px -24px rgba(182, 130, 53, 0.4);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ice-50);
+  color: var(--color-graphite-900);
+  font-family: var(--font-body), ui-serif, Georgia, serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), ui-serif, Georgia, serif;
+}
+
+::selection {
+  background: var(--color-gold-100);
+  color: var(--color-navy-900);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-mist-300) transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-mist-100) 30%,
+    var(--color-mist-50) 50%,
+    var(--color-mist-100) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
 }
