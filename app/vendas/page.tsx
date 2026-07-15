@@ -1,9 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Script from "next/script";
 import "./vendas.css";
+import { CountUp } from "./components/CountUp";
+import { CustomCursor } from "./components/CustomCursor";
+import { MagneticButton } from "./components/MagneticButton";
+import { ScrollProgressBar } from "./components/ScrollProgressBar";
+import { SplitHeadline } from "./components/SplitHeadline";
+import { gsap } from "./lib/gsap";
+
+// R3F/Canvas needs the browser (WebGL context, ResizeObserver on mount) —
+// never rendered on the server, and code-split so mobile/low-end devices
+// that HeroScene itself opts out of never even download the bundle.
+const HeroScene = dynamic(() => import("./components/HeroScene").then((m) => m.HeroScene), { ssr: false });
 
 const PARTNER_FIRMS = [
   { initials: "AC", name: "Almeida & Cardoso" },
@@ -36,20 +48,31 @@ const FAQ_ACCORDION = [
   },
 ];
 
+const TILT_MAX_DEG = 7;
+
 export default function VendasPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const frameGlowRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const stepsSectionRef = useRef<HTMLElement>(null);
+  const stepsTrackFillRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [countdown, setCountdown] = useState({ h: "00", m: "00", s: "00" });
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [heroSceneReady, setHeroSceneReady] = useState(false);
 
-  // cursor-tracked spotlight glow shared by every .spotlight element
+  // cursor-tracked spotlight glow + 3D tilt shared by every .spotlight
+  // element — .tilt cards additionally read --rx/--ry for the rotation.
   const handleSpotlight = useCallback((e: ReactPointerEvent<HTMLElement>) => {
     const el = e.currentTarget;
     const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
     el.style.setProperty("--mx", `${e.clientX - r.left}px`);
     el.style.setProperty("--my", `${e.clientY - r.top}px`);
+    el.style.setProperty("--ry", `${(px - 0.5) * TILT_MAX_DEG * 2}deg`);
+    el.style.setProperty("--rx", `${-(py - 0.5) * TILT_MAX_DEG * 2}deg`);
   }, []);
 
   // sticky nav shadow/blur + hero parallax glow on scroll
@@ -68,9 +91,10 @@ export default function VendasPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // scroll-reveal via IntersectionObserver
+  // scroll-reveal via IntersectionObserver — also drives the .rule
+  // divider-line draw-in (same "in" class, see .rule.in in vendas.css).
   useEffect(() => {
-    const revealEls = rootRef.current?.querySelectorAll<HTMLElement>(".reveal");
+    const revealEls = rootRef.current?.querySelectorAll<HTMLElement>(".reveal, .rule");
     if (!revealEls || revealEls.length === 0) return;
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(
@@ -89,6 +113,71 @@ export default function VendasPage() {
       return () => io.disconnect();
     }
     revealEls.forEach((el) => el.classList.add("in"));
+  }, []);
+
+  // Curtain-wipe reveal for a few high-drama "scene change" moments
+  // (.curtain elements): clip-path uncovers top-down instead of a plain
+  // fade. Kept off layout-affecting properties (clip-path never changes
+  // box size/position) so — unlike the pinned-steps attempt — this can't
+  // perturb scroll height or trigger measurement races.
+  useEffect(() => {
+    const els = rootRef.current?.querySelectorAll<HTMLElement>(".curtain");
+    if (!els || els.length === 0) return;
+    const reducedMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reducedMq.matches) return;
+    const ctx = gsap.context(() => {
+      els.forEach((el) => {
+        gsap.fromTo(
+          el,
+          { clipPath: "inset(0 0 100% 0)" },
+          {
+            clipPath: "inset(0 0 0% 0)",
+            duration: 1.1,
+            ease: "power4.inOut",
+            scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          }
+        );
+      });
+    }, rootRef);
+    return () => ctx.revert();
+  }, []);
+
+  // "Como funciona": pin the section while its 6 steps reveal in sequence
+  // and the connecting rail fills — desktop + motion-allowed only. Below
+  // 1024px the steps are just visible immediately (no JS-dependent reveal),
+  // matching how every other .reveal element already degrades.
+  //
+  // Note: this intentionally scrubs WITHOUT `pin: true`. Pinning this
+  // section inflated total document height and produced a broken scroll
+  // position in testing (the pin spacer's height is computed from the
+  // dynamically-loaded 3D hero's box, which resizes after ScrollTrigger's
+  // first measurement) — scrubbing the reveal as the section passes through
+  // the viewport gets the same "unfolds as you scroll" storytelling without
+  // that fragility.
+  useEffect(() => {
+    const section = stepsSectionRef.current;
+    const fill = stepsTrackFillRef.current;
+    if (!section || !fill) return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const reducedMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!mq.matches || reducedMq.matches) return;
+
+    const steps = section.querySelectorAll<HTMLElement>(".step");
+    const ctx = gsap.context(() => {
+      gsap.set(steps, { opacity: 0, y: 26 });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 75%",
+          end: "bottom 60%",
+          scrub: 0.6,
+        },
+      });
+      tl.to(fill, { scaleX: 1, ease: "none" }, 0);
+      tl.to(steps, { opacity: 1, y: 0, stagger: 0.15, ease: "none" }, 0);
+    }, section);
+
+    return () => ctx.revert();
   }, []);
 
   // urgency countdown — deadline persisted so it doesn't reset on reload
@@ -125,6 +214,8 @@ export default function VendasPage() {
 
   return (
     <div className="vendas-page" ref={rootRef}>
+      <CustomCursor />
+      <ScrollProgressBar />
       <Script src="/vendas/image-slot.js" strategy="afterInteractive" />
 
       <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
@@ -162,12 +253,12 @@ export default function VendasPage() {
         </nav>
 
         {/* HERO */}
-        <section className="hero" data-screen-label="Hero">
+        <section className="hero" data-screen-label="Hero" ref={heroSectionRef}>
           <span className="badge"><svg className="icon"><use href="#i-zap"/></svg> Desenvolvido para a rotina do advogado moderno</span>
-          <h1 className="display">O problema não é criar documentos. É <span className="glow">gerenciar</span> tudo que já foi criado.</h1>
+          <SplitHeadline as="h1" className="display">O problema não é criar documentos. É <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
           <p className="sub">O AdvFlow transforma arquivos espalhados, modelos perdidos e informações desconectadas em uma operação jurídica organizada, rápida e profissional. Centralize clientes, documentos, contratos e modelos em um único lugar.</p>
           <div className="row">
-            <Link href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório</Link>
+            <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório</MagneticButton>
             <Link href="/login" className="btn btn-ghost spotlight" onPointerMove={handleSpotlight}><svg className="icon"><use href="#i-layout"/></svg> Ver o painel</Link>
           </div>
           <div className="frame-wrap reveal">
@@ -180,6 +271,11 @@ export default function VendasPage() {
               <image-slot id="shot-hero" shape="rect" fit="contain" placeholder="Print do painel principal do AdvFlow" src="https://i.imgur.com/dCR4sEl.jpeg"></image-slot>
             </div>
             <figure className="prop prop-gavel"><image-slot id="prop-gavel" shape="rect" placeholder="Elemento isolado (ex: martelo/balança em PNG recortado)"></image-slot></figure>
+            <HeroScene
+              className={`hero-scene-layer${heroSceneReady ? " is-ready" : ""}`}
+              scrollTriggerRef={heroSectionRef}
+              onReady={() => setHeroSceneReady(true)}
+            />
           </div>
         </section>
 
@@ -188,10 +284,10 @@ export default function VendasPage() {
         {/* STATS */}
         <section className="stats">
           <div className="stats-grid">
-            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><p className="num">9.412</p><p className="lbl">Documentos organizados</p></div>
-            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><p className="num">100%</p><p className="lbl">Dados centralizados</p></div>
-            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><p className="num">0</p><p className="lbl">Pastas para procurar</p></div>
-            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><p className="num">1</p><p className="lbl">Lugar só para tudo</p></div>
+            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={9412} /><p className="lbl">Documentos organizados</p></div>
+            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={100} suffix="%" /><p className="lbl">Dados centralizados</p></div>
+            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={0} /><p className="lbl">Pastas para procurar</p></div>
+            <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={1} /><p className="lbl">Lugar só para tudo</p></div>
           </div>
         </section>
 
@@ -218,45 +314,48 @@ export default function VendasPage() {
           </div>
           <div className="video-frame-wrap reveal spotlight" onPointerMove={handleSpotlight}>
             <div className="video-glow" aria-hidden="true"></div>
-            {videoPlaying ? (
-              <div className="video-poster is-playing">
-                <video
-                  src="https://i.imgur.com/xP664sg.mp4"
-                  poster="https://i.imgur.com/HgUL8yE.jpeg"
-                  controls
-                  autoPlay
-                  playsInline
-                  className="video-player"
-                />
-              </div>
-            ) : (
-              <div
-                className="video-poster"
-                id="video-poster"
-                role="button"
-                tabIndex={0}
-                aria-label="Reproduzir vídeo de demonstração"
-                onClick={() => setVideoPlaying(true)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setVideoPlaying(true);
-                  }
-                }}
-              >
-                <image-slot id="shot-video-poster" shape="rect" fit="contain" placeholder="Capa do vídeo de demonstração do AdvFlow" src="https://i.imgur.com/HgUL8yE.jpeg"></image-slot>
-                <div className="play"><span className="btn-play"><svg className="icon"><use href="#i-play"/></svg></span></div>
-              </div>
-            )}
+            <div className="frame">
+              <div className="frame-bar"><span className="dot"></span><span className="dot"></span><span className="dot"></span><span className="url">demonstração</span></div>
+              {videoPlaying ? (
+                <div className="video-poster is-playing">
+                  <video
+                    src="https://i.imgur.com/xP664sg.mp4"
+                    poster="https://i.imgur.com/HgUL8yE.jpeg"
+                    controls
+                    autoPlay
+                    playsInline
+                    className="video-player"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="video-poster"
+                  id="video-poster"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Reproduzir vídeo de demonstração"
+                  onClick={() => setVideoPlaying(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setVideoPlaying(true);
+                    }
+                  }}
+                >
+                  <image-slot id="shot-video-poster" shape="rect" fit="contain" placeholder="Capa do vídeo de demonstração do AdvFlow" src="https://i.imgur.com/HgUL8yE.jpeg"></image-slot>
+                  <div className="play"><span className="btn-play"><svg className="icon"><use href="#i-play"/></svg></span></div>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
         <hr className="rule" />
 
         {/* O PROBLEMA */}
-        <section className="narrative reveal" data-screen-label="O problema">
+        <section className="narrative curtain" data-screen-label="O problema">
           <span className="kicker">O problema não começa quando você cria um documento</span>
-          <h2>Ele começa quando você precisa encontrá-lo meses depois.</h2>
+          <SplitHeadline>Ele começa quando você precisa encontrá-lo meses depois.</SplitHeadline>
           <p>Todo advogado já passou por isso. O cliente liga: &quot;Doutor, consegue me enviar aquele contrato que assinamos no ano passado?&quot; Você responde: &quot;Claro, só um instante.&quot; Mas esse instante vira minutos.</p>
           <div className="file-stack">
             <div className="file-row"><svg className="icon"><use href="#i-file"/></svg> Contrato.docx</div>
@@ -272,17 +371,17 @@ export default function VendasPage() {
         {/* ICON FEATURE GRID: custo / word / advflow */}
         <section className="feature-grid">
           <div className="grid3">
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-clock"/></svg></div>
               <h3>O custo invisível</h3>
               <p>Minutos procurando contratos, procurações e modelos. Multiplicados todos os dias, toda semana, durante anos. Você não perde horas porque trabalha muito — perde porque ainda depende de pastas.</p>
             </div>
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-file"/></svg></div>
               <h3>O problema nunca foi o Word</h3>
               <p>O Word cria documentos, e faz isso muito bem. Mas termina o trabalho exatamente quando o seu começa. Quem organiza, relaciona e centraliza tudo depois? Na maioria dos escritórios: ninguém.</p>
             </div>
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-shield"/></svg></div>
               <h3>É por isso que existimos</h3>
               <p>O AdvFlow não nasceu para substituir o Word. Nasceu para substituir o caos — administrando um escritório jurídico inteiro, não apenas os documentos que ele produz.</p>
@@ -297,7 +396,7 @@ export default function VendasPage() {
           <div className="module-copy reveal">
             <div className="icn"><svg className="icon"><use href="#i-layout"/></svg></div>
             <span className="kicker">Imagine como seria trabalhar assim</span>
-            <h2>Abra o sistema e saiba exatamente o que está acontecendo.</h2>
+            <SplitHeadline>Abra o sistema e saiba exatamente o que está acontecendo.</SplitHeadline>
             <p>Você chega ao escritório, abre o AdvFlow e em poucos segundos já sabe como está sua operação — sem procurar, sem lembrar, sem depender da memória.</p>
             <ul>
               <li><svg className="icon"><use href="#i-check"/></svg> Clientes, documentos e modelos, todos à vista</li>
@@ -423,17 +522,17 @@ export default function VendasPage() {
 
         <section className="feature-grid">
           <div className="grid3">
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-history"/></svg></div>
               <h3>Memória completa</h3>
               <p>Tudo possui histórico. Você sempre sabe quando o documento foi criado, qual modelo foi usado e qual é a versão correta — mesmo anos depois.</p>
             </div>
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-trend"/></svg></div>
               <h3>Cresce com você</h3>
               <p>De vinte a mil clientes, sua biblioteca, seu histórico e sua organização crescem junto — e tudo continua exatamente onde deveria estar.</p>
             </div>
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-shield"/></svg></div>
               <h3>Autoridade percebida</h3>
               <p>O cliente percebe quando você encontra qualquer documento em segundos. Isso transmite confiança e profissionalismo que nenhuma campanha compra.</p>
@@ -445,8 +544,8 @@ export default function VendasPage() {
 
         {/* MID OFFER */}
         <section className="offer" data-screen-label="CTA meio de página">
-          <div className="offer-panel reveal spotlight" onPointerMove={handleSpotlight}>
-            <h2>Organize hoje o que vai definir o crescimento do seu escritório amanhã.</h2>
+          <div className="offer-panel curtain spotlight" onPointerMove={handleSpotlight}>
+            <SplitHeadline>Organize hoje o que vai definir o crescimento do seu escritório amanhã.</SplitHeadline>
             <p className="lede">Pare de procurar documentos. Comece a encontrar tempo.</p>
             <ul className="checklist">
               <li><svg className="icon"><use href="#i-check"/></svg> Clientes centralizados</li>
@@ -457,7 +556,7 @@ export default function VendasPage() {
               <li><svg className="icon"><use href="#i-check"/></svg> Muito mais produtividade</li>
             </ul>
             <div className="row" style={{ display: "flex", justifyContent: "center" }}>
-              <Link href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Começar a Usar o AdvFlow</Link>
+              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Começar a Usar o AdvFlow</MagneticButton>
             </div>
           </div>
         </section>
@@ -491,17 +590,17 @@ export default function VendasPage() {
         <section className="feature-grid">
           <div className="head"><h2>Desenvolvido para a rotina real do advogado</h2></div>
           <div className="grid3">
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-settings"/></svg></div>
               <h3>Identidade configurada uma vez</h3>
               <p>Nome, OAB, endereço, assinatura e logo aparecem automaticamente em todos os documentos — um padrão profissional em toda comunicação.</p>
             </div>
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-zap"/></svg></div>
               <h3>Sempre ao alcance</h3>
               <p>Um menu flutuante acompanha você em qualquer tela — computador, tablet ou celular — sem precisar reaprender onde cada coisa está.</p>
             </div>
-            <div className="card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="icn"><svg className="icon"><use href="#i-trend"/></svg></div>
               <h3>Quanto mais usa, mais valioso</h3>
               <p>O primeiro documento economiza minutos. O décimo economiza horas. Depois de meses, seu escritório inteiro existe dentro do AdvFlow.</p>
@@ -511,21 +610,23 @@ export default function VendasPage() {
 
         <hr className="rule" />
 
-        {/* COMO FUNCIONA */}
-        <section className="steps-section section-relative" data-screen-label="Como funciona" id="como-funciona">
+        {/* COMO FUNCIONA — pinned + scrubbed via GSAP ScrollTrigger, see the
+            dedicated useEffect above (desktop + motion-allowed only). */}
+        <section className="steps-section section-relative" data-screen-label="Como funciona" id="como-funciona" ref={stepsSectionRef}>
           <div className="watermark"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg></div>
           <span className="kicker" style={{ display: "flex", justifyContent: "center" }}>Do primeiro clique ao documento pronto</span>
-          <div className="head"><h2>Como funciona o AdvFlow</h2></div>
+          <div className="head"><SplitHeadline>Como funciona o AdvFlow</SplitHeadline></div>
           <div className="steps-grid">
-            <div className="step reveal"><span className="badge-num">01</span><div className="ring"><svg className="icon"><use href="#i-users"/></svg></div><h3>Cadastre o cliente</h3><p>Dados completos, uma única vez. O sistema lembra por você.</p></div>
-            <div className="step reveal"><span className="badge-num">02</span><div className="ring"><svg className="icon"><use href="#i-file"/></svg></div><h3>Envie seus modelos</h3><p>Suba contratos em .docx e o AdvFlow identifica os campos variáveis.</p></div>
-            <div className="step reveal"><span className="badge-num">03</span><div className="ring"><svg className="icon"><use href="#i-library"/></svg></div><h3>Monte sua biblioteca</h3><p>Organizada por categoria, sempre pronta para reutilizar.</p></div>
-            <div className="step reveal"><span className="badge-num">04</span><div className="ring"><svg className="icon"><use href="#i-wand"/></svg></div><h3>Gere o documento</h3><p>Campos preenchidos automaticamente com os dados do cliente.</p></div>
-            <div className="step reveal"><span className="badge-num">05</span><div className="ring"><svg className="icon"><use href="#i-layout"/></svg></div><h3>Revise em tempo real</h3><p>Pré-visualização fiel, edite qualquer trecho antes de exportar.</p></div>
-            <div className="step reveal"><span className="badge-num">06</span><div className="ring"><svg className="icon"><use href="#i-history"/></svg></div><h3>Fica tudo registrado</h3><p>Histórico e backup automáticos — nada se perde de novo.</p></div>
+            <div className="steps-track-fill" ref={stepsTrackFillRef} aria-hidden="true"></div>
+            <div className="step"><span className="badge-num">01</span><div className="ring"><svg className="icon"><use href="#i-users"/></svg></div><h3>Cadastre o cliente</h3><p>Dados completos, uma única vez. O sistema lembra por você.</p></div>
+            <div className="step"><span className="badge-num">02</span><div className="ring"><svg className="icon"><use href="#i-file"/></svg></div><h3>Envie seus modelos</h3><p>Suba contratos em .docx e o AdvFlow identifica os campos variáveis.</p></div>
+            <div className="step"><span className="badge-num">03</span><div className="ring"><svg className="icon"><use href="#i-library"/></svg></div><h3>Monte sua biblioteca</h3><p>Organizada por categoria, sempre pronta para reutilizar.</p></div>
+            <div className="step"><span className="badge-num">04</span><div className="ring"><svg className="icon"><use href="#i-wand"/></svg></div><h3>Gere o documento</h3><p>Campos preenchidos automaticamente com os dados do cliente.</p></div>
+            <div className="step"><span className="badge-num">05</span><div className="ring"><svg className="icon"><use href="#i-layout"/></svg></div><h3>Revise em tempo real</h3><p>Pré-visualização fiel, edite qualquer trecho antes de exportar.</p></div>
+            <div className="step"><span className="badge-num">06</span><div className="ring"><svg className="icon"><use href="#i-history"/></svg></div><h3>Fica tudo registrado</h3><p>Histórico e backup automáticos — nada se perde de novo.</p></div>
           </div>
           <div className="row" style={{ display: "flex", justifyContent: "center", marginTop: "44px" }}>
-            <Link href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Ver o AdvFlow Funcionando</Link>
+            <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Ver o AdvFlow Funcionando</MagneticButton>
           </div>
         </section>
 
@@ -533,7 +634,7 @@ export default function VendasPage() {
 
         {/* URGÊNCIA */}
         <section className="urgency">
-          <div className="urgency-panel reveal spotlight" onPointerMove={handleSpotlight}>
+          <div className="urgency-panel curtain spotlight" onPointerMove={handleSpotlight}>
             <span className="kicker"><svg className="icon"><use href="#i-clock"/></svg> Condição especial por tempo limitado</span>
             <h2>O preço de lançamento do AdvFlow termina em breve</h2>
             <div className="countdown">
@@ -558,7 +659,7 @@ export default function VendasPage() {
           </div>
           <p className="plans-note">O AdvFlow é sempre completo: clientes, biblioteca, gerador e histórico ilimitados em qualquer plano. A única diferença é quanto você economiza.</p>
           <div className="plans-grid">
-            <div className="plan-card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="plan-card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <span className="kicker">Flexível</span>
               <h3>Mensal</h3>
               <div className="price"><span className="cur">R$</span><span className="val">69,90</span><span className="per">/mês</span></div>
@@ -571,7 +672,7 @@ export default function VendasPage() {
               </ul>
               <Link href="/login" className="btn btn-ghost spotlight" onPointerMove={handleSpotlight}>Assinar Plano Mensal</Link>
             </div>
-            <div className="plan-card feat reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="plan-card feat reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <span className="save-badge">Economize R$ 348,80 por ano</span>
               <span className="kicker">O mais vantajoso</span>
               <h3>Anual</h3>
@@ -583,7 +684,7 @@ export default function VendasPage() {
                 <li><svg className="icon"><use href="#i-check"/></svg> Geração automática de documentos</li>
                 <li><svg className="icon"><use href="#i-check"/></svg> 41% de desconto garantido por 12 meses</li>
               </ul>
-              <Link href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Garantir o Plano Anual</Link>
+              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Garantir o Plano Anual</MagneticButton>
             </div>
           </div>
         </section>
@@ -610,7 +711,7 @@ export default function VendasPage() {
             <h2>O que dizem os advogados que usam o AdvFlow</h2>
           </div>
           <div className="testi-grid">
-            <div className="testi-card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="testi-card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="qi"><svg><use href="#i-quote"/></svg></div>
               <p className="quote">Antes eu perdia meia hora do dia procurando contratos antigos. Hoje encontro tudo em segundos e atendo muito mais clientes.</p>
               <div className="testi-who">
@@ -618,7 +719,7 @@ export default function VendasPage() {
                 <div><p className="name">Fernanda Alcântara</p><p className="role">Advogada cível, escritório próprio</p></div>
               </div>
             </div>
-            <div className="testi-card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="testi-card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="qi"><svg><use href="#i-quote"/></svg></div>
               <p className="quote">Transformei anos de modelos espalhados em uma biblioteca única. Meu escritório finalmente parece do tamanho que sempre foi.</p>
               <div className="testi-who">
@@ -626,7 +727,7 @@ export default function VendasPage() {
                 <div><p className="name">Ricardo Nogueira</p><p className="role">Sócio, Nogueira Advocacia</p></div>
               </div>
             </div>
-            <div className="testi-card reveal spotlight" onPointerMove={handleSpotlight}>
+            <div className="testi-card reveal spotlight tilt" onPointerMove={handleSpotlight}>
               <div className="qi"><svg><use href="#i-quote"/></svg></div>
               <p className="quote">O cliente percebe a diferença. Consigo enviar qualquer documento na hora da reunião, sem pedir para aguardar.</p>
               <div className="testi-who">
@@ -687,9 +788,9 @@ export default function VendasPage() {
 
         {/* FINAL CTA */}
         <section className="offer" data-screen-label="CTA final">
-          <div className="offer-panel reveal spotlight" onPointerMove={handleSpotlight}>
+          <div className="offer-panel curtain spotlight" onPointerMove={handleSpotlight}>
             <span className="kicker" style={{ justifyContent: "center", width: "100%" }}>Chegou a hora de ter controle sobre o seu escritório</span>
-            <h2>Organize hoje o escritório que você quer ter amanhã.</h2>
+            <SplitHeadline>Organize hoje o escritório que você quer ter amanhã.</SplitHeadline>
             <ul className="checklist">
               <li><svg className="icon"><use href="#i-check"/></svg> Centralize seus clientes</li>
               <li><svg className="icon"><use href="#i-check"/></svg> Organize todos os seus documentos</li>
@@ -698,7 +799,7 @@ export default function VendasPage() {
               <li><svg className="icon"><use href="#i-check"/></svg> Transmita mais autoridade</li>
             </ul>
             <div className="row" style={{ display: "flex", justifyContent: "center" }}>
-              <Link href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório Agora</Link>
+              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório Agora</MagneticButton>
             </div>
           </div>
         </section>
