@@ -1,6 +1,5 @@
 import {
   ActivityRepository,
-  AuthRepository,
   ClientRepository,
   DocumentRepository,
   OfficeRepository,
@@ -9,22 +8,14 @@ import {
   TemplateRepository,
 } from "@/lib/repositories/types";
 
-// Stubs for the future Supabase-backed implementation. Swapping the mock
-// data layer for real Supabase auth/DB/storage means implementing these
-// classes against `@supabase/supabase-js` and flipping
-// NEXT_PUBLIC_DATA_BACKEND=supabase in lib/repositories/index.ts — no
-// call site elsewhere in the app should need to change.
+// Stubs for the future Supabase-backed data layer (clients, templates,
+// documents, office, activity, storage). Auth already moved to a real
+// implementation — see lib/repositories/supabase/auth-repo.ts. Migrating
+// each of these means implementing the class against `@supabase/supabase-js`
+// — no call site elsewhere in the app should need to change.
 
 function notImplemented(): never {
-  throw new RepoError("not_implemented", "Backend Supabase ainda não configurado.");
-}
-
-export class SupabaseAuthRepository implements AuthRepository {
-  getSession(): Promise<never> { return notImplemented(); }
-  signUp(): Promise<never> { return notImplemented(); }
-  signIn(): Promise<never> { return notImplemented(); }
-  signOut(): Promise<never> { return notImplemented(); }
-  onAuthStateChange(): () => void { return notImplemented(); }
+  throw new RepoError("not_implemented", "Backend Supabase ainda não configurado para este recurso.");
 }
 
 export class SupabaseOfficeRepository implements OfficeRepository {
