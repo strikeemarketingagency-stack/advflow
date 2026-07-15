@@ -255,7 +255,7 @@ export default function VendasPage() {
         {/* HERO */}
         <section className="hero" data-screen-label="Hero" ref={heroSectionRef}>
           <span className="badge"><svg className="icon"><use href="#i-zap"/></svg> Desenvolvido para a rotina do advogado moderno</span>
-          <SplitHeadline as="h1" className="display">O problema não é criar documentos. É <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
+          <SplitHeadline as="h1" className="display">O problema do seu escritório não é criar documentos, é <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
           <p className="sub">O AdvFlow transforma arquivos espalhados, modelos perdidos e informações desconectadas em uma operação jurídica organizada, rápida e profissional. Centralize clientes, documentos, contratos e modelos em um único lugar.</p>
           <div className="row">
             <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório</MagneticButton>
