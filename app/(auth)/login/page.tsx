@@ -7,7 +7,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-provider";
+import { enterDemoMode } from "@/lib/seed/demo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
@@ -25,6 +27,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { signIn, status } = useAuth();
   const [submitting, setSubmitting] = React.useState(false);
+  const [loadingDemo, setLoadingDemo] = React.useState(false);
 
   const {
     register,
@@ -45,6 +48,19 @@ export default function LoginPage() {
       toast.error(err instanceof Error ? err.message : "Não foi possível entrar.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDemo = async () => {
+    setLoadingDemo(true);
+    try {
+      await enterDemoMode();
+      toast.success("Ambiente de demonstração pronto.");
+      router.replace("/dashboard");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível carregar a demonstração.");
+    } finally {
+      setLoadingDemo(false);
     }
   };
 
@@ -84,6 +100,24 @@ export default function LoginPage() {
               Entrar
             </Button>
           </form>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-xs uppercase tracking-wider text-mist-300/70">ou</span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="w-full border-white/10 bg-white/5 text-mist-100 hover:bg-white/10"
+            loading={loadingDemo}
+            onClick={handleDemo}
+          >
+            <Sparkles className="h-4 w-4 text-gold-400" />
+            Ver demonstração
+          </Button>
         </CardContent>
       </Card>
 
