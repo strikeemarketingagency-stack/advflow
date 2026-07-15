@@ -168,7 +168,7 @@ export default function VendasPage() {
                 <span className="dot"></span><span className="dot"></span><span className="dot"></span>
                 <span className="url">app.advflow.com.br/dashboard</span>
               </div>
-              <image-slot id="shot-hero" shape="rect" placeholder="Print do painel principal do AdvFlow"></image-slot>
+              <image-slot id="shot-hero" shape="rect" placeholder="Print do painel principal do AdvFlow" src="https://i.imgur.com/dCR4sEl.jpeg"></image-slot>
             </div>
             <figure className="prop prop-gavel"><image-slot id="prop-gavel" shape="rect" placeholder="Elemento isolado (ex: martelo/balança em PNG recortado)"></image-slot></figure>
           </div>
