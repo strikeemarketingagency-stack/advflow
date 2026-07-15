@@ -143,7 +143,6 @@ export default function VendasPage() {
 
       <div className="wrap">
         <nav className={`nav${scrolled ? " scrolled" : ""}`}>
-          <div className="nav-brand"><span className="mark">A</span> AdvFlow</div>
           <div className="nav-links">
             <a href="#recursos">Recursos</a>
             <a href="#como-funciona">Como funciona</a>
@@ -151,7 +150,6 @@ export default function VendasPage() {
             <a href="#depoimentos">Depoimentos</a>
             <a href="#faq">FAQ</a>
           </div>
-          <Link href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório</Link>
         </nav>
 
         {/* HERO */}
