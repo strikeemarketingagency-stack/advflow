@@ -5,6 +5,14 @@ import Link from "next/link";
 import Script from "next/script";
 import "./vendas.css";
 
+const PARTNER_FIRMS = [
+  { initials: "AC", name: "Almeida & Cardoso" },
+  { initials: "RM", name: "Ribeiro Martins" },
+  { initials: "BS", name: "Bittencourt Advocacia" },
+  { initials: "VP", name: "Vasconcelos & Prado" },
+  { initials: "TX", name: "Teixeira Empresarial" },
+];
+
 const FAQ_ACCORDION = [
   {
     q: "Preciso migrar meus documentos atuais?",
@@ -34,6 +42,7 @@ export default function VendasPage() {
   const [scrolled, setScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [countdown, setCountdown] = useState({ h: "00", m: "00", s: "00" });
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   // cursor-tracked spotlight glow shared by every .spotlight element
   const handleSpotlight = useCallback((e: ReactPointerEvent<HTMLElement>) => {
@@ -168,7 +177,7 @@ export default function VendasPage() {
                 <span className="dot"></span><span className="dot"></span><span className="dot"></span>
                 <span className="url">app.advflow.com.br/dashboard</span>
               </div>
-              <image-slot id="shot-hero" shape="rect" placeholder="Print do painel principal do AdvFlow" src="https://i.imgur.com/dCR4sEl.jpeg"></image-slot>
+              <image-slot id="shot-hero" shape="rect" fit="contain" placeholder="Print do painel principal do AdvFlow" src="https://i.imgur.com/dCR4sEl.jpeg"></image-slot>
             </div>
             <figure className="prop prop-gavel"><image-slot id="prop-gavel" shape="rect" placeholder="Elemento isolado (ex: martelo/balança em PNG recortado)"></image-slot></figure>
           </div>
@@ -190,11 +199,14 @@ export default function VendasPage() {
         <section className="logos" data-screen-label="Escritórios parceiros">
           <p className="lbl">Usado por escritórios em todo o Brasil</p>
           <div className="logos-row">
-            <div className="logo-slot"><image-slot id="logo-1" shape="rect" placeholder="Logo do escritório"></image-slot></div>
-            <div className="logo-slot"><image-slot id="logo-2" shape="rect" placeholder="Logo do escritório"></image-slot></div>
-            <div className="logo-slot"><image-slot id="logo-3" shape="rect" placeholder="Logo do escritório"></image-slot></div>
-            <div className="logo-slot"><image-slot id="logo-4" shape="rect" placeholder="Logo do escritório"></image-slot></div>
-            <div className="logo-slot"><image-slot id="logo-5" shape="rect" placeholder="Logo do escritório"></image-slot></div>
+            <div className="logos-track">
+              {[...PARTNER_FIRMS, ...PARTNER_FIRMS].map((firm, i) => (
+                <div className="logo-slot" key={`${firm.initials}-${i}`}>
+                  <span className="logo-mark">{firm.initials}</span>
+                  <span className="logo-name">{firm.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -205,11 +217,37 @@ export default function VendasPage() {
             <h2>O AdvFlow em ação, em 2 minutos</h2>
           </div>
           <div className="video-frame-wrap reveal spotlight" onPointerMove={handleSpotlight}>
-            <div className="video-poster" id="video-poster" role="button" tabIndex={0} aria-label="Reproduzir vídeo de demonstração">
-              <image-slot id="shot-video-poster" shape="rect" placeholder="Capa do vídeo de demonstração do AdvFlow"></image-slot>
-              <div className="play"><span className="btn-play"><svg className="icon"><use href="#i-play"/></svg></span></div>
-              <span className="runtime">2:14</span>
-            </div>
+            <div className="video-glow" aria-hidden="true"></div>
+            {videoPlaying ? (
+              <div className="video-poster is-playing">
+                <video
+                  src="https://i.imgur.com/xP664sg.mp4"
+                  poster="https://i.imgur.com/HgUL8yE.jpeg"
+                  controls
+                  autoPlay
+                  playsInline
+                  className="video-player"
+                />
+              </div>
+            ) : (
+              <div
+                className="video-poster"
+                id="video-poster"
+                role="button"
+                tabIndex={0}
+                aria-label="Reproduzir vídeo de demonstração"
+                onClick={() => setVideoPlaying(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setVideoPlaying(true);
+                  }
+                }}
+              >
+                <image-slot id="shot-video-poster" shape="rect" fit="contain" placeholder="Capa do vídeo de demonstração do AdvFlow" src="https://i.imgur.com/HgUL8yE.jpeg"></image-slot>
+                <div className="play"><span className="btn-play"><svg className="icon"><use href="#i-play"/></svg></span></div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -271,7 +309,17 @@ export default function VendasPage() {
             <div className="glow"></div>
             <div className="frame">
               <div className="frame-bar"><span className="dot"></span><span className="dot"></span><span className="dot"></span><span className="url">dashboard</span></div>
-              <image-slot id="shot-dashboard" shape="rect" placeholder="Print do Dashboard"></image-slot>
+              <video
+                className="dashboard-video"
+                src="https://i.imgur.com/rpAFuPs.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate nofullscreen"
+                onContextMenu={(e) => e.preventDefault()}
+              />
             </div>
           </div>
         </section>
@@ -289,7 +337,17 @@ export default function VendasPage() {
             <div className="glow"></div>
             <div className="frame">
               <div className="frame-bar"><span className="dot"></span><span className="dot"></span><span className="dot"></span><span className="url">clientes</span></div>
-              <image-slot id="shot-clientes" shape="rect" placeholder="Print da tela de Clientes"></image-slot>
+              <video
+                className="dashboard-video"
+                src="https://i.imgur.com/ey3UduH.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate nofullscreen"
+                onContextMenu={(e) => e.preventDefault()}
+              />
             </div>
           </div>
         </section>
@@ -310,7 +368,17 @@ export default function VendasPage() {
             <div className="glow"></div>
             <div className="frame">
               <div className="frame-bar"><span className="dot"></span><span className="dot"></span><span className="dot"></span><span className="url">biblioteca</span></div>
-              <image-slot id="shot-biblioteca" shape="rect" placeholder="Print da Biblioteca Inteligente de Modelos"></image-slot>
+              <video
+                className="dashboard-video"
+                src="https://i.imgur.com/QanvQmg.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate nofullscreen"
+                onContextMenu={(e) => e.preventDefault()}
+              />
             </div>
           </div>
         </section>
@@ -331,7 +399,17 @@ export default function VendasPage() {
             <div className="glow"></div>
             <div className="frame">
               <div className="frame-bar"><span className="dot"></span><span className="dot"></span><span className="dot"></span><span className="url">gerador</span></div>
-              <image-slot id="shot-gerador" shape="rect" placeholder="Print do Gerador Inteligente de Documentos"></image-slot>
+              <video
+                className="dashboard-video"
+                src="https://i.imgur.com/8Cohagu.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate nofullscreen"
+                onContextMenu={(e) => e.preventDefault()}
+              />
             </div>
           </div>
         </section>
