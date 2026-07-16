@@ -82,23 +82,14 @@ export default function VendasPage() {
     el.style.setProperty("--rx", `${-(py - 0.5) * TILT_MAX_DEG * 2}deg`);
   }, []);
 
-  // Every in-page anchor/nav button funnels to Planos e Preços — the only
-  // internal destination on this page now that login/checkout links are
-  // gone. Smooth-scrolls explicitly (rather than relying only on the
-  // href="#planos" fragment jump) so it still animates even if the
+  // Every in-page CTA/nav button funnels to Planos e Preços — the only
+  // internal destination on this page now that login is gone and checkout
+  // isn't live yet. Smooth-scrolls explicitly (rather than relying only on
+  // the href="#planos" fragment jump) so it still animates even if the
   // element is targeted from a click handler instead of a real anchor.
   const handleScrollToPricing = useCallback((e: ReactMouseEvent<HTMLElement>) => {
     e.preventDefault();
     document.getElementById("planos")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
-  // Checkout doesn't exist yet — every purchase CTA on the page is fully
-  // styled/interactive but intentionally a no-op until Lastlink checkout
-  // (or whatever replaces it) is wired up.
-  // TODO: redirecionar para checkout Lastlink quando estiver disponível
-  const handleCheckoutClick = useCallback((e: ReactMouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    console.log("checkout pendente");
   }, []);
 
   // sticky nav shadow/blur + hero parallax glow on scroll
@@ -118,7 +109,19 @@ export default function VendasPage() {
   }, []);
 
   // scroll-reveal via IntersectionObserver — also drives the .rule
-  // divider-line draw-in (same "in" class, see .rule.in in vendas.css).
+  // divider-line draw-in (see [data-revealed] in vendas.css).
+  //
+  // Uses a data-attribute rather than a CSS class: elements like the FAQ
+  // accordion items have a React-owned className (it interpolates "open"
+  // in on click), and React overwrites the whole className attribute on
+  // every re-render to match what JSX declares. A class added imperatively
+  // by this observer would get silently wiped the moment that item's state
+  // changed for an unrelated reason — clicking a FAQ question re-rendered
+  // its wrapper div, dropped the "in" class, and the whole answer appeared
+  // to "vanish" (it was still there, just back to .reveal's opacity:0).
+  // React only reconciles the "className" prop, never arbitrary data-*
+  // attributes, so this is immune to that class of bug everywhere .reveal
+  // is used, not just here.
   useEffect(() => {
     const revealEls = rootRef.current?.querySelectorAll<HTMLElement>(".reveal, .rule");
     if (!revealEls || revealEls.length === 0) return;
@@ -127,8 +130,9 @@ export default function VendasPage() {
         (entries) => {
           entries.forEach((entry, idx) => {
             if (entry.isIntersecting) {
-              (entry.target as HTMLElement).style.setProperty("--i", String(idx % 6));
-              entry.target.classList.add("in");
+              const el = entry.target as HTMLElement;
+              el.style.setProperty("--i", String(idx % 6));
+              el.dataset.revealed = "true";
               io.unobserve(entry.target);
             }
           });
@@ -138,7 +142,7 @@ export default function VendasPage() {
       revealEls.forEach((el) => io.observe(el));
       return () => io.disconnect();
     }
-    revealEls.forEach((el) => el.classList.add("in"));
+    revealEls.forEach((el) => { el.dataset.revealed = "true"; });
   }, []);
 
   // Curtain-wipe reveal for a few high-drama "scene change" moments
@@ -288,9 +292,7 @@ export default function VendasPage() {
           <SplitHeadline as="h1" className="display">O problema do seu escritório não é criar documentos, é <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
           <p className="sub">O AdvFlow transforma arquivos espalhados, modelos perdidos e informações desconectadas em uma operação jurídica organizada, rápida e profissional. Centralize clientes, documentos, contratos e modelos em um único lugar.</p>
           <div className="row">
-            {/* Checkout isn't live — placeholder click handler only. */}
-            {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
-            <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Organizar Meu Escritório</MagneticButton>
+            <MagneticButton href="#planos" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleScrollToPricing}>Quero Organizar Meu Escritório</MagneticButton>
           </div>
           <div className="frame-wrap reveal">
             <div className="frame-glow" ref={frameGlowRef}></div>
@@ -587,8 +589,7 @@ export default function VendasPage() {
               <li><svg className="icon"><use href="#i-check"/></svg> Muito mais produtividade</li>
             </ul>
             <div className="row" style={{ display: "flex", justifyContent: "center" }}>
-              {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
-              <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Começar a Usar o AdvFlow</MagneticButton>
+              <MagneticButton href="#planos" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleScrollToPricing}>Quero Começar a Usar o AdvFlow</MagneticButton>
             </div>
           </div>
         </section>
@@ -658,8 +659,7 @@ export default function VendasPage() {
             <div className="step"><span className="badge-num">06</span><div className="ring"><svg className="icon"><use href="#i-history"/></svg></div><h3>Fica tudo registrado</h3><p>Histórico e backup automáticos — nada se perde de novo.</p></div>
           </div>
           <div className="row" style={{ display: "flex", justifyContent: "center", marginTop: "44px" }}>
-            {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
-            <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Ver o AdvFlow Funcionando</MagneticButton>
+            <MagneticButton href="#planos" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleScrollToPricing}>Quero Ver o AdvFlow Funcionando</MagneticButton>
           </div>
         </section>
 
@@ -797,8 +797,7 @@ export default function VendasPage() {
               <li><svg className="icon"><use href="#i-check"/></svg> Transmita mais autoridade</li>
             </ul>
             <div className="row" style={{ display: "flex", justifyContent: "center" }}>
-              {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
-              <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Organizar Meu Escritório Agora</MagneticButton>
+              <MagneticButton href="#planos" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleScrollToPricing}>Quero Organizar Meu Escritório Agora</MagneticButton>
             </div>
           </div>
         </section>
