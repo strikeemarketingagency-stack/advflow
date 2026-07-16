@@ -144,7 +144,14 @@ const FRAGMENT_SHADER = `
   varying vec3 vPosition;
 
   void main(void) {
-    float opacity = (radius - length(vPosition)) / (radius * 2.6667) * maxOpacity;
+    // Falloff ignores X (horizontal) entirely — it's only a function of
+    // height + depth. A radius around full 3D position looks fine at one
+    // specific aspect ratio, but at any other viewport width the visible
+    // patch shrinks toward a "beam" hugging the horizontal center instead
+    // of reaching the edges (wider aspect = wider horizontal FOV = the same
+    // world-space radius covers a smaller fraction of the width). Dropping
+    // X guarantees full edge-to-edge coverage at every aspect ratio.
+    float opacity = (radius - length(vPosition.yz)) / (radius * 2.6667) * maxOpacity;
     gl_FragColor = vec4(color, opacity);
   }
 `;

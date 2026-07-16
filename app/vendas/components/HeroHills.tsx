@@ -23,7 +23,7 @@ export function HeroHills({ className }: HeroHillsProps) {
 
   return (
     <div className={`${className ?? ""}${ready ? " is-ready" : ""}`} aria-hidden="true">
-      <GLSLHills color={tokens.color.gold} opacity={0.35} lookAtY={-30} radius={220} onReady={() => setReady(true)} />
+      <GLSLHills color={tokens.color.gold} opacity={0.35} lookAtY={30} radius={130} onReady={() => setReady(true)} />
     </div>
   );
 }

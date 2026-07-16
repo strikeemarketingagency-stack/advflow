@@ -310,7 +310,7 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
    exactly like it did before this section became a flex container.
    :not(.badge) — the badge is a content-sized pill (display:inline-flex),
    never meant to stretch; width:100% here was forcing it edge-to-edge. */
-.vendas-page .wrap > section > *:not(.badge){ width: 100%; }
+.vendas-page .wrap > section > *:not(.badge):not(.hero-bg-layer){ width: 100%; }
 @media (prefers-reduced-motion: no-preference){
   .vendas-page .wrap > section{
     opacity: 0; filter: blur(28px); transform: scale(0.96);
