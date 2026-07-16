@@ -91,6 +91,8 @@ export const PLANS: Plan[] = [
 
 export interface ComparisonRow {
   category: string;
+  /** Icon id from the page's inline <svg><defs> sprite (e.g. "i-users"). */
+  icon: string;
   basico: string;
   premium: string;
 }
@@ -99,9 +101,9 @@ export interface ComparisonRow {
 // Básico instead of leaving it blank/"—": a visible loss reads as a much
 // stronger trigger than a neutral absence (loss aversion > feature list).
 export const COMPARISON_ROWS: ComparisonRow[] = [
-  { category: "Clientes ativos", basico: "até 30/mês", premium: "ilimitado" },
-  { category: "Modelos na biblioteca", basico: "até 10", premium: "ilimitado + novos toda semana" },
-  { category: "Documentos exportados", basico: "com marca AdvFlow", premium: "com a sua marca" },
-  { category: "Suporte", basico: "padrão", premium: "prioritário" },
-  { category: "Visibilidade do crescimento", basico: "—", premium: "painel de produtividade" },
+  { category: "Clientes ativos", icon: "i-users", basico: "até 30/mês", premium: "ilimitado" },
+  { category: "Modelos na biblioteca", icon: "i-library", basico: "até 10", premium: "ilimitado + novos toda semana" },
+  { category: "Documentos exportados", icon: "i-file", basico: "com marca AdvFlow", premium: "com a sua marca" },
+  { category: "Suporte", icon: "i-zap", basico: "padrão", premium: "prioritário" },
+  { category: "Visibilidade do crescimento", icon: "i-trend", basico: "—", premium: "painel de produtividade" },
 ];

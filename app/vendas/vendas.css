@@ -135,24 +135,54 @@
   margin: 4px 0 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 .vendas-page .plan-cta-note{ font-size: 12.5px; color: var(--ink-dimmer); text-align: center; margin: 10px 0 0; }
 
-/* Comparison table — Premium column gets a gold tint/border so the eye
-   lands there row after row; "Documentos exportados" intentionally shows
-   the Básico cost in words instead of a blank cell (see lib/pricing.ts). */
-.vendas-page .compare-table-wrap{ max-width: 900px; margin: 56px auto 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.vendas-page .compare-table{ width: 100%; border-collapse: separate; border-spacing: 0; min-width: 480px; }
-.vendas-page .compare-table th, .vendas-page .compare-table td{ padding: 14px 18px; text-align: left; font-size: 14.5px;
+/* Comparison table — presented as its own elevated panel (matching the
+   card/guarantee-panel treatment elsewhere on the page) rather than a bare
+   HTML table. Premium column gets a full-height gold tint/border + a
+   "Recomendado" tag so the eye lands there row after row; "Documentos
+   exportados" intentionally shows the Básico cost in words instead of a
+   blank cell (see lib/pricing.ts). */
+.vendas-page .compare-table-outer{ position: relative; max-width: 900px; margin: 56px auto 0; }
+.vendas-page .compare-table-glow{ position: absolute; inset: -50px; z-index: -1; pointer-events: none;
+  background: radial-gradient(560px 260px at 78% 0%, rgba(217,167,90,0.16), transparent 70%); filter: blur(20px); }
+/* The scroll container itself: kept separate from compare-table-outer so
+   the glow above (which deliberately bleeds -50px past every edge) never
+   contributes to this element's scrollWidth/scrollHeight — an
+   absolutely-positioned child extending past an overflow:auto ancestor's
+   bounds otherwise creates real (and here, entirely unwanted) scrollbars. */
+.vendas-page .compare-table-wrap{ overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line-strong); border-radius: 20px;
+  background: var(--panel); box-shadow: 0 40px 90px -40px rgba(0,0,0,0.7); padding: 8px; }
+.vendas-page .compare-table{ width: 100%; border-collapse: separate; border-spacing: 0; min-width: 500px; }
+.vendas-page .compare-table col.col-category{ width: 40%; }
+.vendas-page .compare-table col.col-basico{ width: 28%; }
+.vendas-page .compare-table col.col-premium-col{ width: 32%; }
+.vendas-page .compare-table th, .vendas-page .compare-table td{ padding: 16px 18px; text-align: left; font-size: 14.5px;
   border-bottom: 1px solid var(--line); }
-.vendas-page .compare-table thead th{ font-family: var(--font-heading); font-weight: 400; font-size: 16px;
-  color: var(--ink); padding-bottom: 16px; }
-.vendas-page .compare-table tbody th{ font-weight: 400; color: var(--ink-dim); white-space: nowrap; }
+.vendas-page .compare-table thead th{ font-family: var(--font-body); font-weight: 600; font-size: 11.5px;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-dimmer); padding: 14px 22px 16px;
+  background: var(--panel-2); }
+.vendas-page .compare-table thead th:first-child{ border-radius: 14px 0 0 0; }
+.vendas-page .compare-table thead th:last-child{ border-radius: 0 14px 0 0; }
+.vendas-page .compare-table tbody th{ font-weight: 500; font-size: 15px; color: var(--ink); display: table-cell; }
+.vendas-page .compare-icn{ display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+  border-radius: 8px; margin-right: 11px; background: rgba(217,167,90,0.12); color: var(--gold-bright); vertical-align: -8px; }
+.vendas-page .compare-icn svg{ width: 14px; height: 14px; }
 .vendas-page .compare-table td{ color: var(--ink-dim); }
+.vendas-page .compare-table tbody tr:nth-child(even) th, .vendas-page .compare-table tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,0.015); }
 .vendas-page .compare-table tbody tr:last-child th, .vendas-page .compare-table tbody tr:last-child td{ border-bottom: 0; }
-.vendas-page .compare-table tbody tr:hover th, .vendas-page .compare-table tbody tr:hover td{ background: rgba(255,255,255,0.025); }
-.vendas-page .compare-table .col-premium{ position: relative; color: var(--ink); font-weight: 500;
-  background: rgba(217,167,90,0.06); border-left: 1px solid rgba(217,167,90,0.3); border-right: 1px solid rgba(217,167,90,0.3); }
-.vendas-page .compare-table thead .col-premium{ color: var(--gold-bright); border-top: 1px solid rgba(217,167,90,0.3);
-  border-radius: 10px 10px 0 0; }
-.vendas-page .compare-table tbody tr:last-child .col-premium{ border-radius: 0 0 10px 10px; border-bottom: 1px solid rgba(217,167,90,0.3); }
+.vendas-page .compare-table tbody tr:last-child th{ border-radius: 0 0 0 14px; }
+.vendas-page .compare-table tbody tr:hover th, .vendas-page .compare-table tbody tr:hover td{ background: rgba(233,199,137,0.05); }
+.vendas-page .compare-table .col-premium{ position: relative; color: var(--ink); font-weight: 600;
+  background: linear-gradient(180deg, rgba(233,199,137,0.1), rgba(233,199,137,0.04));
+  border-left: 1px solid rgba(217,167,90,0.35); border-right: 1px solid rgba(217,167,90,0.35); }
+.vendas-page .compare-table thead .col-premium{ color: var(--gold-bright); font-size: 15px; text-transform: none;
+  letter-spacing: 0.01em; font-family: var(--font-heading); font-weight: 400;
+  border-top: 1px solid rgba(217,167,90,0.45); border-radius: 0 14px 0 0; padding-top: 10px; }
+.vendas-page .col-premium-tag{ display: block; font-family: var(--font-body); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase; color: #2a1a06; background: linear-gradient(180deg, #f6d49c, #b9812f);
+  border-radius: 999px; padding: 3px 10px; margin-bottom: 8px; width: max-content; }
+.vendas-page .compare-table tbody tr:last-child .col-premium{ border-radius: 0 0 14px 0; border-bottom: 1px solid rgba(217,167,90,0.45); }
 
 @media (max-width: 700px) {.vendas-page .plans-grid{ grid-template-columns: 1fr; }
 /* Premium reads first on mobile — it's the intended default choice, not
