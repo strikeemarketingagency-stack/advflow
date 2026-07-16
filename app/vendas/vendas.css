@@ -607,6 +607,15 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
   pointer-events: none; overflow: hidden; }
 .vendas-page .hero-bg-layer.is-ready{ opacity: 1; }
 .vendas-page .hero-bg-layer canvas{ width: 100% !important; height: 100% !important; display: block; }
+/* Smoky black fade at the very bottom of the hero — the hills render in a
+   warm gold tint, but the next slide (.showcase) is the page's plain dark
+   background, so without this the hand-off between the two full-page
+   slides reads as an abrupt color jump. Fading the wave out to the same
+   dark bg color right at the section's edge means it's already "gone" by
+   the time the snap transition hands off, so the two slides read as one
+   continuous dark surface instead of two different tones. */
+.vendas-page .hero-bg-layer::after{ content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+  background: linear-gradient(to bottom, transparent, var(--bg) 85%); pointer-events: none; }
 
 /* 3D tilt-on-hover for feature/testimonial/pricing cards. The glass-shine
    glow is already provided by .spotlight (same --mx/--my vars); this only
