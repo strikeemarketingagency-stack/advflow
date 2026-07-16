@@ -110,10 +110,11 @@
 .vendas-page .plan-card .btn{ justify-content: center; width: 100%; }
 .vendas-page .plans-note{ text-align: center; max-width: 56ch; margin: 0 auto 40px; font-size: 15px; color: var(--ink-dim); }
 .vendas-page .plan-card{ position: relative; }
-.vendas-page .plan-card.feat{ padding-top: 44px; }
-.vendas-page .save-badge{ position: absolute; top: -14px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+.vendas-page .plan-card.feat{ padding-top: 60px; }
+.vendas-page .save-badge{ position: absolute; top: -16px; left: 50%; transform: translateX(-50%); white-space: normal;
+  text-align: center; width: 88%; letter-spacing: 0.02em; line-height: 1.3;
   background: linear-gradient(180deg, #f6d49c, #b9812f); color: #2a1a06; font-size: 12.5px; font-weight: 700;
-  padding: 7px 18px; border-radius: 999px; box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5); }
+  padding: 8px 18px; border-radius: 16px; box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5); }
 .vendas-page .price{ display: flex; align-items: baseline; gap: 4px; margin: 4px 0 4px; }
 .vendas-page .price .cur{ font-size: 18px; color: var(--gold-bright); font-family: var(--font-heading); }
 .vendas-page .price .val{ font-family: var(--font-heading); font-size: clamp(38px,4vw,50px); font-feature-settings: "tnum" 1; color: var(--ink); line-height: 1; }
@@ -121,8 +122,41 @@
 .vendas-page .price-note{ font-size: 13.5px; color: var(--ink-dimmer); margin: 0 0 22px; }
 .vendas-page .price-note s{ color: var(--ink-dimmer); opacity: 0.7; }
 .vendas-page .price-note strong{ color: var(--gold-bright); font-weight: 600; }
+/* Price-anchoring subtext (Premium): smaller + secondary color so the big
+   number does the talking and this just reframes it as "a few reais/day". */
+.vendas-page .price-anchor{ color: var(--ink-dim); }
+.vendas-page .plan-card li strong{ color: var(--ink); font-weight: 600; }
+/* Reinforcement microcopy under the Premium bullets — quietly recasts
+   Básico as "just the essentials" right before the CTA. Deliberately
+   subdued (smaller, dimmer, italic) so it doesn't compete with the bullets
+   or the button above/below it. */
+.vendas-page .plan-reinforcement{ font-size: 13.5px; line-height: 1.55; color: var(--ink-dimmer); font-style: italic;
+  margin: 4px 0 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.vendas-page .plan-cta-note{ font-size: 12.5px; color: var(--ink-dimmer); text-align: center; margin: 10px 0 0; }
+
+/* Comparison table — Premium column gets a gold tint/border so the eye
+   lands there row after row; "Documentos exportados" intentionally shows
+   the Básico cost in words instead of a blank cell (see lib/pricing.ts). */
+.vendas-page .compare-table-wrap{ max-width: 900px; margin: 56px auto 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.vendas-page .compare-table{ width: 100%; border-collapse: separate; border-spacing: 0; min-width: 480px; }
+.vendas-page .compare-table th, .vendas-page .compare-table td{ padding: 14px 18px; text-align: left; font-size: 14.5px;
+  border-bottom: 1px solid var(--line); }
+.vendas-page .compare-table thead th{ font-family: var(--font-heading); font-weight: 400; font-size: 16px;
+  color: var(--ink); padding-bottom: 16px; }
+.vendas-page .compare-table tbody th{ font-weight: 400; color: var(--ink-dim); white-space: nowrap; }
+.vendas-page .compare-table td{ color: var(--ink-dim); }
+.vendas-page .compare-table tbody tr:last-child th, .vendas-page .compare-table tbody tr:last-child td{ border-bottom: 0; }
+.vendas-page .compare-table tbody tr:hover th, .vendas-page .compare-table tbody tr:hover td{ background: rgba(255,255,255,0.025); }
+.vendas-page .compare-table .col-premium{ position: relative; color: var(--ink); font-weight: 500;
+  background: rgba(217,167,90,0.06); border-left: 1px solid rgba(217,167,90,0.3); border-right: 1px solid rgba(217,167,90,0.3); }
+.vendas-page .compare-table thead .col-premium{ color: var(--gold-bright); border-top: 1px solid rgba(217,167,90,0.3);
+  border-radius: 10px 10px 0 0; }
+.vendas-page .compare-table tbody tr:last-child .col-premium{ border-radius: 0 0 10px 10px; border-bottom: 1px solid rgba(217,167,90,0.3); }
 
 @media (max-width: 700px) {.vendas-page .plans-grid{ grid-template-columns: 1fr; }
+/* Premium reads first on mobile — it's the intended default choice, not
+   an upsell the visitor has to scroll past the "safe" option to find. */
+.vendas-page .plan-card.feat{ order: -1; }
  }
 .vendas-page .guarantee{ padding: clamp(48px,7vw,80px) 0; }
 .vendas-page .guarantee-panel{ max-width: 820px; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: 20px;

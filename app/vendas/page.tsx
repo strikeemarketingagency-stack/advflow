@@ -8,6 +8,7 @@ import "./vendas.css";
 import { CountUp } from "./components/CountUp";
 import { CustomCursor } from "./components/CustomCursor";
 import { MagneticButton } from "./components/MagneticButton";
+import { PricingSection } from "./components/PricingSection";
 import { ScrollProgressBar } from "./components/ScrollProgressBar";
 import { SplitHeadline } from "./components/SplitHeadline";
 import { gsap } from "./lib/gsap";
@@ -652,42 +653,7 @@ export default function VendasPage() {
         <hr className="rule" />
 
         {/* PLANOS */}
-        <section className="plans" id="planos">
-          <div className="head">
-            <span className="kicker" style={{ display: "flex", justifyContent: "center" }}>Escolha como começar</span>
-            <h2>Um plano para cada tamanho de escritório</h2>
-          </div>
-          <p className="plans-note">O AdvFlow é sempre completo: clientes, biblioteca, gerador e histórico ilimitados em qualquer plano. A única diferença é quanto você economiza.</p>
-          <div className="plans-grid">
-            <div className="plan-card reveal spotlight tilt" onPointerMove={handleSpotlight}>
-              <span className="kicker">Flexível</span>
-              <h3>Mensal</h3>
-              <div className="price"><span className="cur">R$</span><span className="val">69,90</span><span className="per">/mês</span></div>
-              <p className="price-note">Cobrado todo mês, cancele quando quiser</p>
-              <ul>
-                <li><svg className="icon"><use href="#i-check"/></svg> Todo o poder do AdvFlow, sem limitações</li>
-                <li><svg className="icon"><use href="#i-check"/></svg> Clientes, biblioteca e histórico ilimitados</li>
-                <li><svg className="icon"><use href="#i-check"/></svg> Geração automática de documentos</li>
-                <li><svg className="icon"><use href="#i-check"/></svg> Suporte contínuo</li>
-              </ul>
-              <Link href="/login" className="btn btn-ghost spotlight" onPointerMove={handleSpotlight}>Assinar Plano Mensal</Link>
-            </div>
-            <div className="plan-card feat reveal spotlight tilt" onPointerMove={handleSpotlight}>
-              <span className="save-badge">Economize R$ 348,80 por ano</span>
-              <span className="kicker">O mais vantajoso</span>
-              <h3>Anual</h3>
-              <div className="price"><span className="cur">R$</span><span className="val">490</span><span className="per">/ano</span></div>
-              <p className="price-note"><s>R$ 838,80</s> pagando mês a mês — equivale a <strong>R$ 40,83/mês</strong></p>
-              <ul>
-                <li><svg className="icon"><use href="#i-check"/></svg> Todo o poder do AdvFlow, sem limitações</li>
-                <li><svg className="icon"><use href="#i-check"/></svg> Clientes, biblioteca e histórico ilimitados</li>
-                <li><svg className="icon"><use href="#i-check"/></svg> Geração automática de documentos</li>
-                <li><svg className="icon"><use href="#i-check"/></svg> 41% de desconto garantido por 12 meses</li>
-              </ul>
-              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Garantir o Plano Anual</MagneticButton>
-            </div>
-          </div>
-        </section>
+        <PricingSection onPointerMove={handleSpotlight} />
 
         <hr className="rule" />
 
