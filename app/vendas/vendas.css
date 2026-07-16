@@ -149,10 +149,9 @@
    contributes to this element's scrollWidth/scrollHeight — an
    absolutely-positioned child extending past an overflow:auto ancestor's
    bounds otherwise creates real (and here, entirely unwanted) scrollbars. */
-.vendas-page .compare-table-wrap{ overflow-x: auto; -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--line-strong); border-radius: 20px;
+.vendas-page .compare-table-wrap{ border: 1px solid var(--line-strong); border-radius: 20px;
   background: var(--panel); box-shadow: 0 40px 90px -40px rgba(0,0,0,0.7); padding: 8px; }
-.vendas-page .compare-table{ width: 100%; border-collapse: separate; border-spacing: 0; min-width: 500px; }
+.vendas-page .compare-table{ width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
 .vendas-page .compare-table col.col-category{ width: 40%; }
 .vendas-page .compare-table col.col-basico{ width: 28%; }
 .vendas-page .compare-table col.col-premium-col{ width: 32%; }

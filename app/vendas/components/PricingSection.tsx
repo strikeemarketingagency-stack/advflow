@@ -105,8 +105,8 @@ export function PricingSection({ onPointerMove }: PricingSectionProps) {
                   <span className="compare-icn"><svg className="icon"><use href={`#${row.icon}`} /></svg></span>
                   {row.category}
                 </th>
-                <td>{row.basico}</td>
-                <td className="col-premium">{row.premium}</td>
+                <td data-label="Básico">{row.basico}</td>
+                <td className="col-premium" data-label="Premium">{row.premium}</td>
               </tr>
             ))}
           </tbody>
