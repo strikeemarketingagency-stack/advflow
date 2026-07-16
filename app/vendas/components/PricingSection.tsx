@@ -1,7 +1,7 @@
 "use client";
 
-import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
-import { COMPARISON_ROWS, PLANS } from "../lib/pricing";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import { COMPARISON_ROWS, MOBILE_PLAN_HOOK, PLANS } from "../lib/pricing";
 import { MagneticButton } from "./MagneticButton";
 
 interface PricingSectionProps {
@@ -80,7 +80,20 @@ export function PricingSection({ onPointerMove }: PricingSectionProps) {
             )}
             {plan.ctaNote && <p className="plan-cta-note">{plan.ctaNote}</p>}
           </div>
-        ))}
+        )).reduce<ReactNode[]>((acc, card, i) => {
+          acc.push(card);
+          // Mobile-only bridge between Básico and Premium — invisible on
+          // desktop (side-by-side grid), see .plan-hook in vendas.css.
+          if (i === 0) {
+            acc.push(
+              <div className="plan-hook" key="plan-hook">
+                <span className="kicker">{MOBILE_PLAN_HOOK.kicker}</span>
+                <p>{MOBILE_PLAN_HOOK.text}</p>
+              </div>
+            );
+          }
+          return acc;
+        }, [])}
       </div>
 
       {/* Comparison table — Premium column visually singled out (gold

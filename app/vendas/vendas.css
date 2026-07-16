@@ -100,6 +100,11 @@
 .vendas-page .plans .head h2{ font-family: var(--font-heading); font-weight: 400; font-size: clamp(26px,3.2vw,40px); margin: 0; }
 .vendas-page .plans-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 26px; max-width: 900px; margin: 0 auto;
   align-items: start; }
+/* Mobile-only bridge between the stacked Básico/Premium cards (content in
+   lib/pricing.ts MOBILE_PLAN_HOOK). Hidden on desktop, where the cards sit
+   side by side and a callout between them would just be a stray box in
+   the middle of the grid. */
+.vendas-page .plan-hook{ display: none; }
 .vendas-page .plan-card{ border: 1px solid var(--line-strong); border-radius: 18px; padding: clamp(28px,4vw,38px);
   background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent); display: flex; flex-direction: column; }
 .vendas-page .plan-card.feat{ border-color: rgba(217,167,90,0.5); background: radial-gradient(400px 220px at 50% 0%, rgba(217,167,90,0.14), transparent 70%), var(--panel); }
@@ -183,10 +188,22 @@
   border-radius: 999px; padding: 3px 10px; margin-bottom: 8px; width: max-content; }
 .vendas-page .compare-table tbody tr:last-child .col-premium{ border-radius: 0 0 14px 0; border-bottom: 1px solid rgba(217,167,90,0.45); }
 
-@media (max-width: 700px) {.vendas-page .plans-grid{ grid-template-columns: 1fr; }
-/* Premium reads first on mobile — it's the intended default choice, not
-   an upsell the visitor has to scroll past the "safe" option to find. */
-.vendas-page .plan-card.feat{ order: -1; }
+@media (max-width: 700px) {.vendas-page .plans-grid{ grid-template-columns: 1fr; gap: 44px; }
+/* Básico reads first on mobile, in natural document order — the .hook
+   card between the two (rendered in PricingSection.tsx) is what carries
+   the reader from "essential" to "you actually want Premium", instead of
+   front-loading Premium before the visitor knows what it's being
+   compared against. */
+.vendas-page .plan-hook{ display: block; text-align: center; max-width: 46ch; margin: 0 auto; padding: 4px 12px; }
+.vendas-page .plan-hook .kicker{ display: flex; justify-content: center; margin-bottom: 10px; }
+.vendas-page .plan-hook p{ font-family: var(--font-heading); font-size: clamp(19px,5vw,23px); font-weight: 400;
+  line-height: 1.35; color: var(--ink); margin: 0; }
+/* More breathing room around the comparison table on small screens —
+   cramped padding is what made it feel like a spreadsheet pasted in. */
+.vendas-page .compare-table-outer{ margin-top: 64px; }
+.vendas-page .compare-table th, .vendas-page .compare-table td{ padding: 20px 16px; text-align: center; }
+.vendas-page .compare-table tbody th{ padding-bottom: 14px; }
+.vendas-page .compare-icn{ display: flex; margin: 0 auto 10px; }
  }
 .vendas-page .guarantee{ padding: clamp(48px,7vw,80px) 0; }
 .vendas-page .guarantee-panel{ max-width: 820px; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: 20px;
@@ -597,4 +614,43 @@ html.cursor-hover .cursor-dot{ opacity: 0; }
 .vendas-page .curtain{ clip-path: inset(0 0 0 0); }
 @media (prefers-reduced-motion: reduce) {.vendas-page .curtain{ clip-path: none !important; }
  }
+
+/* ============================================================
+   PASS 3 — mobile responsiveness pass: everything below only applies
+   at max-width:700px (the breakpoint the pricing grid/table already
+   used). Centers all text site-wide on small screens, opens up
+   spacing that read as cramped, and centers the icon+text rows that
+   text-align alone can't reach (they're flex rows, so the row itself
+   needs justify-content:center; the wrapped label inside still needs
+   its own text-align:center on top of that).
+   ============================================================ */
+@media (max-width: 700px) {
+  .vendas-page{ text-align: center; }
+
+  /* Icon chips that sit alone above a heading/paragraph */
+  .vendas-page .card .icn, .vendas-page .module-copy .icn, .vendas-page .faq-item .icn,
+  .vendas-page .guarantee-panel .seal, .vendas-page .compare-icn{
+    margin-left: auto; margin-right: auto; }
+
+  /* Icon+text flex rows: center the group, and center the (often
+     multi-line) label inside it instead of leaving it ragged-left. */
+  .vendas-page .plan-card li, .vendas-page .module-copy li, .vendas-page .checklist li,
+  .vendas-page .file-row, .vendas-page .testi-who, .vendas-page .compare-col .row,
+  .vendas-page .faq-item{
+    justify-content: center; text-align: center; }
+  .vendas-page .plan-card li, .vendas-page .module-copy li, .vendas-page .checklist li{
+    flex-direction: column; align-items: center; gap: 6px; }
+  .vendas-page .faq-item{ flex-direction: column; align-items: center; }
+  .vendas-page .testi-who{ flex-direction: column; }
+  .vendas-page .file-row{ justify-content: flex-start; text-align: left; }
+
+  /* Bigger breathing room where the layout felt cramped */
+  .vendas-page .plan-card{ padding: clamp(32px,7vw,44px); }
+  .vendas-page .plan-card ul{ gap: 22px; margin-bottom: 32px; }
+  .vendas-page .card, .vendas-page .testi-card{ padding: 32px 24px; }
+  .vendas-page .module{ gap: 48px; }
+  .vendas-page .module-copy ul{ gap: 18px; }
+  .vendas-page .faq-item{ padding: 32px 0; gap: 14px; }
+  .vendas-page .compare-col{ padding: 28px 20px; }
+}
 

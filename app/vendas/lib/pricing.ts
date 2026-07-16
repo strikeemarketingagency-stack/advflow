@@ -89,6 +89,15 @@ export const PLANS: Plan[] = [
   },
 ];
 
+// Mobile-only transition between the two plan cards (Básico stacks first on
+// small screens; this is what carries the reader from "the essential plan"
+// to "why Premium is what you actually want" instead of jumping straight
+// from one price to the next with no bridge).
+export const MOBILE_PLAN_HOOK = {
+  kicker: "Mas antes de decidir",
+  text: "Veja o que muda quando seu escritório para de operar no limite.",
+};
+
 export interface ComparisonRow {
   category: string;
   /** Icon id from the page's inline <svg><defs> sprite (e.g. "i-users"). */
