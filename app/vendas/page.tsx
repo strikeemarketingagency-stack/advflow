@@ -23,6 +23,7 @@ import { gsap } from "./lib/gsap";
 // never rendered on the server, and code-split so mobile/low-end devices
 // that HeroScene itself opts out of never even download the bundle.
 const HeroScene = dynamic(() => import("./components/HeroScene").then((m) => m.HeroScene), { ssr: false });
+const HeroHills = dynamic(() => import("./components/HeroHills").then((m) => m.HeroHills), { ssr: false });
 
 const PARTNER_FIRMS = [
   { initials: "AC", name: "Almeida & Cardoso" },
@@ -61,6 +62,7 @@ export default function VendasPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const frameGlowRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
+  const showcaseSectionRef = useRef<HTMLElement>(null);
   const stepsSectionRef = useRef<HTMLElement>(null);
   const stepsTrackFillRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -143,6 +145,37 @@ export default function VendasPage() {
       return () => io.disconnect();
     }
     revealEls.forEach((el) => { el.dataset.revealed = "true"; });
+  }, []);
+
+  // Full-page slides: each top-level section blurs into focus as it becomes
+  // the active snapped slide, and blurs back out if the user snaps past it
+  // in either direction — unlike the .reveal observer above (which fires
+  // once and unobserves), this toggles every time, so no `once`/unobserve.
+  // rootMargin shrinks the observed viewport to a thin band across its
+  // vertical center (instead of an area-ratio threshold): a section reveals
+  // exactly when it's the one occupying screen-center, regardless of its own
+  // height. A plain area threshold (e.g. 0.6) breaks for any section taller
+  // than ~1.7 viewports — pricing/FAQ-sized content can never cover 60% of
+  // the viewport no matter where you scroll it to, so it'd stay blurred
+  // forever (confirmed in testing: the tall "plans" section never revealed
+  // under threshold: 0.6).
+  useEffect(() => {
+    const slideEls = rootRef.current?.querySelectorAll<HTMLElement>(".wrap > section");
+    if (!slideEls || slideEls.length === 0) return;
+    if (!("IntersectionObserver" in window)) {
+      slideEls.forEach((el) => { el.dataset.slideRevealed = "true"; });
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          (entry.target as HTMLElement).dataset.slideRevealed = entry.isIntersecting ? "true" : "false";
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+    );
+    slideEls.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
   // Curtain-wipe reveal for a few high-drama "scene change" moments
@@ -288,12 +321,18 @@ export default function VendasPage() {
 
         {/* HERO */}
         <section className="hero" data-screen-label="Hero" ref={heroSectionRef}>
+          <HeroHills className="hero-bg-layer" />
           <span className="badge"><svg className="icon"><use href="#i-zap"/></svg> Desenvolvido para a rotina do advogado moderno</span>
           <SplitHeadline as="h1" className="display">O problema do seu escritório não é criar documentos, é <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
+        </section>
+
+        <hr className="rule" />
+
+        {/* SHOWCASE — subheadline + product screenshot + primary CTA, split
+            out of the Hero slide so Hero stays a clean headline-only first
+            screen. */}
+        <section className="showcase" data-screen-label="Demonstração do produto" ref={showcaseSectionRef}>
           <p className="sub">O AdvFlow transforma arquivos espalhados, modelos perdidos e informações desconectadas em uma operação jurídica organizada, rápida e profissional. Centralize clientes, documentos, contratos e modelos em um único lugar.</p>
-          <div className="row">
-            <MagneticButton href="#planos" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleScrollToPricing}>Quero Organizar Meu Escritório</MagneticButton>
-          </div>
           <div className="frame-wrap reveal">
             <div className="frame-glow" ref={frameGlowRef}></div>
             <div className="frame">
@@ -306,9 +345,12 @@ export default function VendasPage() {
             <figure className="prop prop-gavel"><image-slot id="prop-gavel" shape="rect" placeholder="Elemento isolado (ex: martelo/balança em PNG recortado)"></image-slot></figure>
             <HeroScene
               className={`hero-scene-layer${heroSceneReady ? " is-ready" : ""}`}
-              scrollTriggerRef={heroSectionRef}
+              scrollTriggerRef={showcaseSectionRef}
               onReady={() => setHeroSceneReady(true)}
             />
+          </div>
+          <div className="row">
+            <MagneticButton href="#planos" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleScrollToPricing}>Quero Organizar Meu Escritório</MagneticButton>
           </div>
         </section>
 
@@ -316,25 +358,27 @@ export default function VendasPage() {
 
         {/* STATS */}
         <section className="stats">
+          <div className="head">
+            <span className="kicker" style={{ display: "flex", justifyContent: "center" }}>O resultado, em números</span>
+            <h2>Menos tempo procurando, mais tempo advogando</h2>
+          </div>
           <div className="stats-grid">
             <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={9412} /><p className="lbl">Documentos organizados</p></div>
             <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={100} suffix="%" /><p className="lbl">Dados centralizados</p></div>
             <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={0} /><p className="lbl">Pastas para procurar</p></div>
             <div className="stat reveal spotlight" onPointerMove={handleSpotlight}><CountUp className="num" value={1} /><p className="lbl">Lugar só para tudo</p></div>
           </div>
-        </section>
-
-        {/* LOGOS / PROVA SOCIAL */}
-        <section className="logos" data-screen-label="Escritórios parceiros">
-          <p className="lbl">Usado por escritórios em todo o Brasil</p>
-          <div className="logos-row">
-            <div className="logos-track">
-              {[...PARTNER_FIRMS, ...PARTNER_FIRMS].map((firm, i) => (
-                <div className="logo-slot" key={`${firm.initials}-${i}`}>
-                  <span className="logo-mark">{firm.initials}</span>
-                  <span className="logo-name">{firm.name}</span>
-                </div>
-              ))}
+          <div className="stats-social">
+            <p className="stats-social-label">Usado por escritórios em todo o Brasil</p>
+            <div className="logos-row">
+              <div className="logos-track">
+                {[...PARTNER_FIRMS, ...PARTNER_FIRMS].map((firm, i) => (
+                  <div className="logo-slot" key={`${firm.initials}-${i}`}>
+                    <span className="logo-mark">{firm.initials}</span>
+                    <span className="logo-name">{firm.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -549,7 +593,7 @@ export default function VendasPage() {
         <hr className="rule" />
 
         <section className="quote-strip">
-          <div className="qi"><svg className="icon" style={{ width: "32px", height: "32px" }}><use href="#i-quote"/></svg></div>
+          <div className="qi"><svg className="icon" style={{ width: "48px", height: "48px" }}><use href="#i-quote"/></svg></div>
           <p>Não é apenas sobre economizar tempo. É sobre a imagem que você transmite.</p>
         </section>
 

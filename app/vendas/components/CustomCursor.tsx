@@ -26,24 +26,39 @@ export function CustomCursor() {
     const ring = ringRef.current;
     if (!dot || !ring) return;
 
-    document.documentElement.classList.add("custom-cursor-active");
-
-    let mx = window.innerWidth / 2;
-    let my = window.innerHeight / 2;
-    let rx = mx;
-    let ry = my;
+    // Real coordinates are unknown until the pointer actually moves — before
+    // that, this used to default to viewport-center and switch the real OS
+    // cursor off, leaving a stray gold ring parked dead-center of whatever's
+    // on screen (glaring during scroll-only browsing, e.g. trackpad/wheel
+    // scrolling through the full-page slides without ever nudging the mouse).
+    // Both stay hidden, and the native cursor stays on, until the first real
+    // pointermove gives us a true position.
+    let mx = 0;
+    let my = 0;
+    let rx = 0;
+    let ry = 0;
     let raf = 0;
+    let hasMoved = false;
 
     const onMove = (e: PointerEvent) => {
       mx = e.clientX;
       my = e.clientY;
       dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+      if (!hasMoved) {
+        hasMoved = true;
+        rx = mx;
+        ry = my;
+        ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+        document.documentElement.classList.add("custom-cursor-active");
+      }
     };
 
     const loop = () => {
-      rx += (mx - rx) * 0.16;
-      ry += (my - ry) * 0.16;
-      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      if (hasMoved) {
+        rx += (mx - rx) * 0.16;
+        ry += (my - ry) * 0.16;
+        ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);

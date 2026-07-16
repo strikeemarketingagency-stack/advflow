@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { ScrollTrigger, gsap } from "../lib/gsap";
 import { tokens } from "../lib/tokens";
+import { computeWebGLEligibility } from "../lib/webgl-eligibility";
 
 /**
  * Isometric "dashboard" made of a handful of floating rounded panels at
@@ -82,15 +83,6 @@ function Scene({ scrollRef }: { scrollRef: React.MutableRefObject<number> }) {
   );
 }
 
-function supportsWebGL() {
-  try {
-    const canvas = document.createElement("canvas");
-    return !!(window.WebGLRenderingContext && (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")));
-  } catch {
-    return false;
-  }
-}
-
 interface HeroSceneProps {
   className?: string;
   /** Element to scroll-link the scene's drift against (the hero section). */
@@ -109,20 +101,8 @@ interface HeroSceneProps {
 // next/dynamic with ssr:false), so computing eligibility as a lazy useState
 // initializer is safe — no window/navigator access happens during SSR, and
 // it avoids an extra render pass (vs. computing it in a mount effect).
-function computeEligibility() {
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const wide = window.matchMedia("(min-width: 900px)").matches;
-  const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
-  // Only bail on an explicit data-saver flag or the two genuinely-constrained
-  // tiers — "3g" alone is excluded from the cutoff because browsers report it
-  // as a common, imprecise default (virtualized/CI environments included)
-  // and the scene has near-zero payload (procedural geometry, no textures).
-  const slow = nav.connection?.saveData || /^(slow-)?2g$/.test(nav.connection?.effectiveType ?? "");
-  return wide && !reduced && !slow && supportsWebGL();
-}
-
 export function HeroScene({ className, scrollTriggerRef, onReady }: HeroSceneProps) {
-  const [eligible, setEligible] = useState(computeEligibility);
+  const [eligible, setEligible] = useState(computeWebGLEligibility);
   const scrollRef = useRef(0);
 
   // One-way downgrade only: a window shrunk below the desktop breakpoint
