@@ -17,13 +17,19 @@ import { localStorageRepo } from "@/lib/repositories/local/storage-repo";
 import { supabaseAuthRepo } from "@/lib/repositories/supabase/auth-repo";
 
 // Single swap point. NEXT_PUBLIC_DATA_BACKEND=supabase today only swaps
-// `authRepo` for the real Supabase-backed implementation (needed so accounts
-// created server-side by the Lastlink webhook can actually log in) — the
-// other repositories still live in the browser (localStorage/IndexedDB)
-// until they get their own Supabase implementation in
+// `authRepo` for the real Supabase-backed implementation — the other
+// repositories still live in the browser (localStorage/IndexedDB) until
+// they get their own Supabase implementation in
 // lib/repositories/supabase/not-implemented.ts. Every other file in the app
 // imports repos from here, never from local/ or supabase/ directly, so each
 // future swap requires no call-site changes.
+//
+// Note: this project previously had a Lastlink payment webhook
+// (app/api/webhooks/lastlink/route.ts) that auto-created a Supabase account
+// on purchase via admin.auth.admin.inviteUserByEmail. That flow has been
+// discontinued and the route removed — post-purchase account access will be
+// handled by a separate membership-area platform (out of scope for this
+// repo for now). This authRepo swap point is unrelated infra and stays.
 const BACKEND = process.env.NEXT_PUBLIC_DATA_BACKEND ?? "mock";
 const useSupabaseAuth = BACKEND === "supabase";
 

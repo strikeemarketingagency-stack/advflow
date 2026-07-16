@@ -1,12 +1,19 @@
 "use client";
 
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { COMPARISON_ROWS, PLANS } from "../lib/pricing";
 import { MagneticButton } from "./MagneticButton";
-import Link from "next/link";
 
 interface PricingSectionProps {
   onPointerMove: (e: ReactPointerEvent<HTMLElement>) => void;
+}
+
+// Checkout isn't live yet — both plan CTAs are fully styled/interactive
+// but intentionally do nothing until real checkout exists.
+// TODO: redirecionar para checkout Lastlink quando estiver disponível
+function handleCheckoutClick(e: ReactMouseEvent<HTMLElement>) {
+  e.preventDefault();
+  console.log("checkout pendente");
 }
 
 /**
@@ -63,13 +70,13 @@ export function PricingSection({ onPointerMove }: PricingSectionProps) {
             {plan.reinforcement && <p className="plan-reinforcement">{plan.reinforcement}</p>}
 
             {plan.ctaVariant === "primary" ? (
-              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={onPointerMove}>
+              <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={onPointerMove} onClick={handleCheckoutClick}>
                 {plan.ctaLabel}
               </MagneticButton>
             ) : (
-              <Link href="/login" className="btn btn-ghost spotlight" onPointerMove={onPointerMove}>
+              <a href="#" className="btn btn-ghost spotlight" onPointerMove={onPointerMove} onClick={handleCheckoutClick}>
                 {plan.ctaLabel}
-              </Link>
+              </a>
             )}
             {plan.ctaNote && <p className="plan-cta-note">{plan.ctaNote}</p>}
           </div>

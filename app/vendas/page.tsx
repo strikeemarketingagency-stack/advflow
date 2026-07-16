@@ -1,8 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import Script from "next/script";
 import "./vendas.css";
 import { CountUp } from "./components/CountUp";
@@ -74,6 +80,25 @@ export default function VendasPage() {
     el.style.setProperty("--my", `${e.clientY - r.top}px`);
     el.style.setProperty("--ry", `${(px - 0.5) * TILT_MAX_DEG * 2}deg`);
     el.style.setProperty("--rx", `${-(py - 0.5) * TILT_MAX_DEG * 2}deg`);
+  }, []);
+
+  // Every in-page anchor/nav button funnels to Planos e Preços — the only
+  // internal destination on this page now that login/checkout links are
+  // gone. Smooth-scrolls explicitly (rather than relying only on the
+  // href="#planos" fragment jump) so it still animates even if the
+  // element is targeted from a click handler instead of a real anchor.
+  const handleScrollToPricing = useCallback((e: ReactMouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    document.getElementById("planos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  // Checkout doesn't exist yet — every purchase CTA on the page is fully
+  // styled/interactive but intentionally a no-op until Lastlink checkout
+  // (or whatever replaces it) is wired up.
+  // TODO: redirecionar para checkout Lastlink quando estiver disponível
+  const handleCheckoutClick = useCallback((e: ReactMouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    console.log("checkout pendente");
   }, []);
 
   // sticky nav shadow/blur + hero parallax glow on scroll
@@ -245,11 +270,15 @@ export default function VendasPage() {
       <div className="wrap">
         <nav className={`nav${scrolled ? " scrolled" : ""}`}>
           <div className="nav-links">
-            <a href="#recursos">Recursos</a>
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#planos">Planos</a>
-            <a href="#depoimentos">Depoimentos</a>
-            <a href="#faq">FAQ</a>
+            {/* Every nav link points at Planos e Preços — the page's single
+                internal destination now that login is gone and checkout
+                isn't live yet, so navigation reinforces the one CTA that
+                exists instead of scattering attention across sections. */}
+            <a href="#planos" onClick={handleScrollToPricing}>Recursos</a>
+            <a href="#planos" onClick={handleScrollToPricing}>Como funciona</a>
+            <a href="#planos" onClick={handleScrollToPricing}>Planos</a>
+            <a href="#planos" onClick={handleScrollToPricing}>Depoimentos</a>
+            <a href="#planos" onClick={handleScrollToPricing}>FAQ</a>
           </div>
         </nav>
 
@@ -259,8 +288,9 @@ export default function VendasPage() {
           <SplitHeadline as="h1" className="display">O problema do seu escritório não é criar documentos, é <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
           <p className="sub">O AdvFlow transforma arquivos espalhados, modelos perdidos e informações desconectadas em uma operação jurídica organizada, rápida e profissional. Centralize clientes, documentos, contratos e modelos em um único lugar.</p>
           <div className="row">
-            <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório</MagneticButton>
-            <Link href="/login" className="btn btn-ghost spotlight" onPointerMove={handleSpotlight}><svg className="icon"><use href="#i-layout"/></svg> Ver o painel</Link>
+            {/* Checkout isn't live — placeholder click handler only. */}
+            {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
+            <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Organizar Meu Escritório</MagneticButton>
           </div>
           <div className="frame-wrap reveal">
             <div className="frame-glow" ref={frameGlowRef}></div>
@@ -557,7 +587,8 @@ export default function VendasPage() {
               <li><svg className="icon"><use href="#i-check"/></svg> Muito mais produtividade</li>
             </ul>
             <div className="row" style={{ display: "flex", justifyContent: "center" }}>
-              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Começar a Usar o AdvFlow</MagneticButton>
+              {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
+              <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Começar a Usar o AdvFlow</MagneticButton>
             </div>
           </div>
         </section>
@@ -627,7 +658,8 @@ export default function VendasPage() {
             <div className="step"><span className="badge-num">06</span><div className="ring"><svg className="icon"><use href="#i-history"/></svg></div><h3>Fica tudo registrado</h3><p>Histórico e backup automáticos — nada se perde de novo.</p></div>
           </div>
           <div className="row" style={{ display: "flex", justifyContent: "center", marginTop: "44px" }}>
-            <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Ver o AdvFlow Funcionando</MagneticButton>
+            {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
+            <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Ver o AdvFlow Funcionando</MagneticButton>
           </div>
         </section>
 
@@ -765,7 +797,8 @@ export default function VendasPage() {
               <li><svg className="icon"><use href="#i-check"/></svg> Transmita mais autoridade</li>
             </ul>
             <div className="row" style={{ display: "flex", justifyContent: "center" }}>
-              <MagneticButton href="/login" className="btn btn-primary spotlight" onPointerMove={handleSpotlight}>Quero Organizar Meu Escritório Agora</MagneticButton>
+              {/* TODO: redirecionar para checkout Lastlink quando estiver disponível */}
+              <MagneticButton href="#" className="btn btn-primary spotlight" onPointerMove={handleSpotlight} onClick={handleCheckoutClick}>Quero Organizar Meu Escritório Agora</MagneticButton>
             </div>
           </div>
         </section>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface MagneticButtonProps {
@@ -10,6 +10,7 @@ interface MagneticButtonProps {
   className?: string;
   children: ReactNode;
   onPointerMove?: (e: ReactPointerEvent<HTMLElement>) => void;
+  onClick?: (e: ReactMouseEvent<HTMLAnchorElement>) => void;
   /** Max pixel displacement toward the cursor before it clamps. */
   strength?: number;
 }
@@ -20,7 +21,7 @@ interface MagneticButtonProps {
  * missing the pointer on release. Capped well below the button's own size
  * so it never drifts out from under a committed click.
  */
-export function MagneticButton({ href, className, children, onPointerMove, strength = 14 }: MagneticButtonProps) {
+export function MagneticButton({ href, className, children, onPointerMove, onClick, strength = 14 }: MagneticButtonProps) {
   const reduced = useReducedMotion();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -29,7 +30,7 @@ export function MagneticButton({ href, className, children, onPointerMove, stren
 
   if (reduced) {
     return (
-      <Link href={href} className={className} onPointerMove={onPointerMove}>
+      <Link href={href} className={className} onPointerMove={onPointerMove} onClick={onClick}>
         {children}
       </Link>
     );
@@ -51,7 +52,7 @@ export function MagneticButton({ href, className, children, onPointerMove, stren
 
   return (
     <motion.div style={{ x: springX, y: springY, display: "inline-block" }}>
-      <Link href={href} className={className} onPointerMove={handleMove} onPointerLeave={handleLeave}>
+      <Link href={href} className={className} onPointerMove={handleMove} onPointerLeave={handleLeave} onClick={onClick}>
         {children}
       </Link>
     </motion.div>
