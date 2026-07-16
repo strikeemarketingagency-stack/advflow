@@ -15,6 +15,14 @@
 }
 .vendas-page *{ box-sizing: border-box; }
 .vendas-page{ overflow-x: hidden; }
+/* Mobile browsers show whatever's behind the page during rubber-band
+   overscroll (the bounce past the top/bottom edge) — globals.css sets
+   body's background to the light app theme (--color-ice-50) for the
+   logged-in dashboard, which flashes as a jarring white bar when you
+   overscroll on this dark page. :has() scopes the dark background (and
+   the overscroll suppression) to only when .vendas-page is actually
+   rendered, so the dashboard/app pages keep their own theme untouched. */
+html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-behavior-y: none; }
 /* scroll-behavior: smooth lives on <html> itself (set/restored via effect in page.tsx) since
    CSS scroll-behavior only affects the box being scrolled, and here that's the document. */
 .vendas-page{
@@ -201,9 +209,17 @@
 /* More breathing room around the comparison table on small screens —
    cramped padding is what made it feel like a spreadsheet pasted in. */
 .vendas-page .compare-table-outer{ margin-top: 64px; }
-.vendas-page .compare-table th, .vendas-page .compare-table td{ padding: 20px 16px; text-align: center; }
+.vendas-page .compare-table th, .vendas-page .compare-table td{ padding: 20px 10px; text-align: center; }
 .vendas-page .compare-table tbody th{ padding-bottom: 14px; }
 .vendas-page .compare-icn{ display: flex; margin: 0 auto 10px; }
+/* The "Recomendado" tag used width:max-content (sized to its own text,
+   ignoring the column it sits in) — on a narrow Premium column that
+   pushed it past the card's rounded edge instead of fitting inside.
+   Letting it wrap/shrink to the column's real width fixes that. */
+.vendas-page .compare-table thead th{ font-size: 10.5px; padding: 12px 8px 14px; }
+.vendas-page .compare-table thead .col-premium{ font-size: 13px; padding-top: 8px; }
+.vendas-page .col-premium-tag{ width: auto; max-width: 100%; white-space: normal;
+  font-size: 8.5px; letter-spacing: 0.05em; padding: 3px 6px; margin: 0 auto 6px; }
  }
 .vendas-page .guarantee{ padding: clamp(48px,7vw,80px) 0; }
 .vendas-page .guarantee-panel{ max-width: 820px; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: 20px;
