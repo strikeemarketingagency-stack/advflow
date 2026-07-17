@@ -137,6 +137,31 @@ export default function VendasPage() {
     return () => ro.disconnect();
   }, []);
 
+  // Feeds --mountain-clear: the measured pixel distance from Hero's own top
+  // to the bottom of the title. hero-bg-layer's gradient (vendas.css) uses
+  // this to mask the animated terrain down to exactly that point, so it
+  // never renders behind the headline regardless of how many lines the
+  // title wraps to at a given viewport/font size — masking the canvas
+  // visually like this (rather than shrinking hero-bg-layer's own box,
+  // tried and reverted earlier) leaves the WebGL camera's aspect ratio
+  // untouched, so the terrain itself never distorts.
+  useEffect(() => {
+    const hero = heroSectionRef.current;
+    const title = hero?.querySelector<HTMLElement>(".display");
+    if (!hero || !title) return;
+    const update = () => {
+      const heroRect = hero.getBoundingClientRect();
+      const titleRect = title.getBoundingClientRect();
+      const clear = Math.max(0, Math.round(titleRect.bottom - heroRect.top));
+      hero.style.setProperty("--mountain-clear", `${clear}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(hero);
+    ro.observe(title);
+    return () => ro.disconnect();
+  }, []);
+
   // scroll-reveal via IntersectionObserver — also drives the .rule
   // divider-line draw-in (see [data-revealed] in vendas.css).
   //

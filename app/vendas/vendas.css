@@ -407,8 +407,8 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
 .vendas-page .badge{ align-self: center; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gold-bright);
   border: 1px solid var(--line-strong); background: rgba(217,167,90,0.06); border-radius: 999px;
   padding: 8px 18px; margin-bottom: 32px; }
-.vendas-page .display{ font-family: var(--font-heading); font-weight: 400; font-size: clamp(52px, 11vw, 128px);
-  line-height: 1.05; letter-spacing: -0.02em; max-width: 19ch; margin: 0 auto; text-align: center; }
+.vendas-page .display{ font-family: var(--font-heading); font-weight: 400; font-size: clamp(48px, 6vw, 72px);
+  line-height: 1.08; letter-spacing: -0.02em; max-width: 19ch; margin: 0 auto; text-align: center; }
 .vendas-page .display .glow{ background: linear-gradient(135deg, var(--gold-bright), var(--gold)); -webkit-background-clip: text;
   background-clip: text; color: transparent; }
 .vendas-page .hero .sub, .vendas-page .showcase .sub{ font-size: 19px; line-height: 1.65; max-width: 58ch; margin: 28px auto 0; color: var(--ink-dim); }
@@ -649,13 +649,21 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
    dark bg color right at the section's edge means it's already "gone" by
    the time the snap transition hands off, so the two slides read as one
    continuous dark surface instead of two different tones. */
+/* --mountain-clear (set in page.tsx) is the measured pixel distance from
+   Hero's top to the title's bottom edge — masking the canvas down to that
+   point (plus a small fixed gap) guarantees real breathing room under the
+   title without ever touching hero-bg-layer's own box (shrinking that
+   distorted the WebGL camera's aspect ratio and made things worse, see the
+   reverted attempt). The remaining percentage-based stops still do their
+   original job: fading the visible strip of terrain to black by the very
+   bottom of Hero so the hand-off into the next slide stays seamless. */
 .vendas-page .hero-bg-layer::after{ content: ""; position: absolute; inset: 0;
   background: linear-gradient(to bottom,
-    transparent 0%, transparent 16%,
-    rgba(10,9,8,0.18) 30%,
-    rgba(10,9,8,0.45) 45%,
-    rgba(10,9,8,0.75) 65%,
-    var(--bg) 90%);
+    var(--bg) 0, var(--bg) var(--mountain-clear, 260px),
+    transparent calc(var(--mountain-clear, 260px) + 48px),
+    rgba(10,9,8,0.45) 88%,
+    rgba(10,9,8,0.75) 94%,
+    var(--bg) 100%);
   pointer-events: none; }
 
 /* 3D tilt-on-hover for feature/testimonial/pricing cards. The glass-shine
