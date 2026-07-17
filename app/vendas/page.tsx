@@ -14,6 +14,7 @@ import "./vendas.css";
 import { CountUp } from "./components/CountUp";
 import { CustomCursor } from "./components/CustomCursor";
 import { MagneticButton } from "./components/MagneticButton";
+import { PricingComparisonTable } from "./components/PricingComparisonTable";
 import { PricingSection } from "./components/PricingSection";
 import { ScrollProgressBar } from "./components/ScrollProgressBar";
 import { SplitHeadline } from "./components/SplitHeadline";
@@ -759,6 +760,7 @@ export default function VendasPage() {
 
         {/* GARANTIA */}
         <section className="guarantee">
+          <PricingComparisonTable />
           <div className="guarantee-panel reveal spotlight" onPointerMove={handleSpotlight}>
             <div className="seal"><svg className="icon"><use href="#i-shield"/></svg></div>
             <div>
