@@ -320,8 +320,16 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
    measured in page.tsx and fed in as --nav-h, is subtracted here so Hero
    still fits in exactly one screen instead of nav's height pushing its
    bottom (badge/headline + the fade into the next slide) below the fold
-   on first load. */
-.vendas-page .wrap > section.hero{ min-height: calc(100dvh - var(--nav-h, 0px)); }
+   on first load.
+
+   justify-content:flex-start overrides the generic centered
+   `.wrap > section` rule above — vertically centering the badge+title
+   group pins the title's bottom edge at roughly the hero's vertical
+   center no matter the title's own size, which only ever leaves a thin
+   sliver below for the animated mountain background. Anchoring content
+   to the top (the padding-top on .hero gives the breathing room) frees
+   the entire lower portion of the hero for the terrain instead. */
+.vendas-page .wrap > section.hero{ min-height: calc(100dvh - var(--nav-h, 0px)); justify-content: flex-start; }
 /* Turning every section into a flex column (above) silently broke every
    "centered content box" already in this file: things like .frame-wrap,
    .video-frame-wrap, .guarantee-panel etc. all use the max-width + margin:
