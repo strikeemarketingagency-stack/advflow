@@ -27,8 +27,14 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
    window.scrollY-based effects elsewhere on this page (sticky nav shadow,
    hero glow parallax) keep working untouched — only the snap points and
    each section's own box are new. Disabled entirely under reduced-motion,
-   where the page reverts to a plain continuously-scrolling document. */
-@media (prefers-reduced-motion: no-preference){
+   where the page reverts to a plain continuously-scrolling document.
+   Desktop only (min-width matches the .testi-grid breakpoint below): on
+   touch devices, mandatory snap + scroll-snap-stop:always fights momentum
+   scrolling — the browser fires the snap mid-fling, which reads as the
+   page "sticking" and jumping back to the previous slide instead of
+   following the swipe. Below that width the document scrolls continuously,
+   like any normal page. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 861px){
   html:has(.vendas-page){ scroll-snap-type: y mandatory; }
 }
 /* scroll-behavior: smooth lives on <html> itself (set/restored via effect in page.tsx) since
@@ -324,12 +330,25 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
    :not(.badge) — the badge is a content-sized pill (display:inline-flex),
    never meant to stretch; width:100% here was forcing it edge-to-edge. */
 .vendas-page .wrap > section > *:not(.badge):not(.hero-bg-layer){ width: 100%; }
-@media (prefers-reduced-motion: no-preference){
+@media (prefers-reduced-motion: no-preference) and (min-width: 861px){
   .vendas-page .wrap > section{
     opacity: 0; filter: blur(28px); transform: scale(0.96);
     transition: opacity 1s cubic-bezier(.16,1,.3,1), filter 1.1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1);
   }
   .vendas-page .wrap > section[data-slide-revealed="true"]{ opacity: 1; filter: blur(0); transform: scale(1); }
+}
+/* Mobile: same "materializes as it arrives" idea, but without the blur —
+   filter is one of the most expensive properties to repaint on mobile
+   GPUs, and animating it on every section while the user is actively
+   flinging the page is what made scrolling feel like it was stuttering.
+   Opacity + a small translateY is effectively free to composite, so the
+   scroll itself stays smooth while the reveal still reads as motion. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 860px){
+  .vendas-page .wrap > section{
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+  }
+  .vendas-page .wrap > section[data-slide-revealed="true"]{ opacity: 1; transform: none; }
 }
 .vendas-page .spotlight{ position: relative; isolation: isolate; }
 .vendas-page .spotlight::before{ content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 0;
