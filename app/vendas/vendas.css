@@ -296,6 +296,14 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
   min-height: 100dvh; display: flex; flex-direction: column; justify-content: center;
   scroll-snap-align: start; scroll-snap-stop: always;
 }
+/* Hero is the one slide that sits below the nav in normal flow (every
+   later slide has already scrolled past the point where nav goes sticky,
+   so it overlays them instead of pushing them down) — nav's real height,
+   measured in page.tsx and fed in as --nav-h, is subtracted here so Hero
+   still fits in exactly one screen instead of nav's height pushing its
+   bottom (badge/headline + the fade into the next slide) below the fold
+   on first load. */
+.vendas-page .wrap > section.hero{ min-height: calc(100dvh - var(--nav-h, 0px)); }
 /* Turning every section into a flex column (above) silently broke every
    "centered content box" already in this file: things like .frame-wrap,
    .video-frame-wrap, .guarantee-panel etc. all use the max-width + margin:

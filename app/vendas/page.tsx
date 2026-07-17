@@ -60,6 +60,7 @@ const TILT_MAX_DEG = 7;
 
 export default function VendasPage() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const frameGlowRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
   const showcaseSectionRef = useRef<HTMLElement>(null);
@@ -108,6 +109,31 @@ export default function VendasPage() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Nav sits in normal document flow above the full-page slides, so it
+  // pushes the first slide (Hero) down by its own height — Hero's
+  // min-height:100dvh (see .wrap > section in vendas.css) then no longer
+  // fits in one screen, and its bottom (badge/headline + the fade into
+  // the next slide) sits below the fold until the user scrolls. Measuring
+  // nav's real height here and feeding it back as --nav-h lets Hero's own
+  // min-height subtract it, so Hero always fits in exactly one viewport
+  // on load, no scrolling required. Only Hero needs this: nav is `sticky`,
+  // so once scrolled past, it overlays every later slide instead of still
+  // occupying flow space.
+  useEffect(() => {
+    const nav = navRef.current;
+    const root = rootRef.current;
+    if (!nav || !root) return;
+    const ro = new ResizeObserver(([entry]) => {
+      // contentRect excludes padding — nav's padding is exactly what makes
+      // it tall, so that undercounted its real footprint in the document
+      // flow by ~2x the padding. getBoundingClientRect (border-box) is
+      // what actually determines how far it pushes Hero down.
+      root.style.setProperty("--nav-h", `${entry.target.getBoundingClientRect().height}px`);
+    });
+    ro.observe(nav);
+    return () => ro.disconnect();
   }, []);
 
   // scroll-reveal via IntersectionObserver — also drives the .rule
@@ -305,7 +331,7 @@ export default function VendasPage() {
       </svg>
 
       <div className="wrap">
-        <nav className={`nav${scrolled ? " scrolled" : ""}`}>
+        <nav className={`nav${scrolled ? " scrolled" : ""}`} ref={navRef}>
           <div className="nav-links">
             {/* Every nav link points at Planos e Preços — the page's single
                 internal destination now that login is gone and checkout
@@ -325,8 +351,6 @@ export default function VendasPage() {
           <span className="badge"><svg className="icon"><use href="#i-zap"/></svg> Desenvolvido para a rotina do advogado moderno</span>
           <SplitHeadline as="h1" className="display">O problema do seu escritório não é criar documentos, é <span className="glow">gerenciar</span> tudo que já foi criado.</SplitHeadline>
         </section>
-
-        <hr className="rule" />
 
         {/* SHOWCASE — subheadline + product screenshot + primary CTA, split
             out of the Hero slide so Hero stays a clean headline-only first
