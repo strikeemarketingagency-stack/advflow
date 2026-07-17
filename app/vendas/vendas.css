@@ -230,7 +230,12 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
   font-size: 10px; letter-spacing: 0.05em; padding: 3px 8px; margin: 0 auto 6px; }
  }
 .vendas-page .guarantee{ padding: clamp(48px,7vw,80px) 0; }
-.vendas-page .guarantee-panel{ max-width: 820px; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: 20px;
+/* Guarantee panel now sits right under the comparison table in the same
+   slide (moved here from Plans) — matching its max-width keeps both blocks
+   edge-aligned instead of the table reading wider/misaligned, and the
+   added top margin gives them breathing room instead of touching directly
+   (compare-table-outer has no bottom margin of its own). */
+.vendas-page .guarantee-panel{ max-width: 900px; margin: clamp(40px,6vw,64px) auto 0; border: 1px solid var(--line-strong); border-radius: 20px;
   padding: clamp(32px,5vw,52px); display: flex; align-items: center; gap: clamp(24px,4vw,40px);
   background: radial-gradient(420px 240px at 15% 20%, rgba(217,167,90,0.12), transparent 70%), var(--panel); }
 .vendas-page .guarantee-panel .seal{ flex-shrink: 0; width: 92px; height: 92px; border-radius: 50%;
