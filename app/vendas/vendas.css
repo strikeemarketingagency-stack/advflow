@@ -622,8 +622,14 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
    dark bg color right at the section's edge means it's already "gone" by
    the time the snap transition hands off, so the two slides read as one
    continuous dark surface instead of two different tones. */
-.vendas-page .hero-bg-layer::after{ content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
-  background: linear-gradient(to bottom, transparent, var(--bg) 85%); pointer-events: none; }
+.vendas-page .hero-bg-layer::after{ content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom,
+    transparent 0%, transparent 16%,
+    rgba(10,9,8,0.18) 30%,
+    rgba(10,9,8,0.45) 45%,
+    rgba(10,9,8,0.75) 65%,
+    var(--bg) 90%);
+  pointer-events: none; }
 
 /* 3D tilt-on-hover for feature/testimonial/pricing cards. The glass-shine
    glow is already provided by .spotlight (same --mx/--my vars); this only

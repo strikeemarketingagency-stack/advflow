@@ -10,10 +10,10 @@ interface HeroHillsProps {
 }
 
 /**
- * Full-bleed animated terrain behind the hero copy + product frame. Same
- * progressive-enhancement gate as HeroScene (desktop/motion/WebGL/data-saver)
- * since it's the same cost profile — procedural geometry, no textures, but a
- * per-frame vertex-shader noise pass over a 256x256 plane.
+ * Full-bleed animated terrain behind the hero copy + product frame. Runs on
+ * mobile too — same progressive-enhancement gate as HeroScene (motion/WebGL/
+ * data-saver), just not gated on viewport width, since this background is
+ * meant to show up everywhere, not just desktop.
  */
 export function HeroHills({ className }: HeroHillsProps) {
   const [eligible] = useState(computeWebGLEligibility);
@@ -23,7 +23,7 @@ export function HeroHills({ className }: HeroHillsProps) {
 
   return (
     <div className={`${className ?? ""}${ready ? " is-ready" : ""}`} aria-hidden="true">
-      <GLSLHills color={tokens.color.gold} opacity={0.35} lookAtY={30} radius={130} onReady={() => setReady(true)} />
+      <GLSLHills color={tokens.color.gold} opacity={0.35} lookAtY={30} radius={280} onReady={() => setReady(true)} />
     </div>
   );
 }

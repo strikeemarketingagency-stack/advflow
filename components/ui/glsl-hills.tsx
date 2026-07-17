@@ -151,7 +151,13 @@ const FRAGMENT_SHADER = `
     // of reaching the edges (wider aspect = wider horizontal FOV = the same
     // world-space radius covers a smaller fraction of the width). Dropping
     // X guarantees full edge-to-edge coverage at every aspect ratio.
-    float opacity = (radius - length(vPosition.yz)) / (radius * 2.6667) * maxOpacity;
+    //
+    // smoothstep (not a linear ramp) so the terrain dissolves into black
+    // gradually — a linear falloff still reads as a visible edge where the
+    // wave texture meets flat black, because the eye picks up on the last
+    // sliver of visible noise detail even at low opacity.
+    float t = clamp(1.0 - length(vPosition.yz) / radius, 0.0, 1.0);
+    float opacity = smoothstep(0.0, 1.0, t) * maxOpacity;
     gl_FragColor = vec4(color, opacity);
   }
 `;
