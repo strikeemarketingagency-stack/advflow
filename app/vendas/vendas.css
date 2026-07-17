@@ -780,13 +780,19 @@ html.cursor-hover .cursor-dot{ opacity: 0; }
      multi-line) label inside it instead of leaving it ragged-left. */
   .vendas-page .plan-card li, .vendas-page .module-copy li, .vendas-page .checklist li,
   .vendas-page .file-row, .vendas-page .testi-who, .vendas-page .compare-col .row,
-  .vendas-page .faq-item{
+  .vendas-page .compare-col h3, .vendas-page .faq-item{
     justify-content: center; text-align: center; }
   .vendas-page .plan-card li, .vendas-page .module-copy li, .vendas-page .checklist li{
     flex-direction: column; align-items: center; gap: 6px; }
   .vendas-page .faq-item{ flex-direction: column; align-items: center; }
   .vendas-page .testi-who{ flex-direction: column; }
   .vendas-page .file-row{ justify-content: flex-start; text-align: left; }
+
+  /* .price is a flex row (R$ / value / período) — text-align:center above
+     doesn't reach flex children, so it kept hugging the card's left edge
+     while the kicker, name and note around it were centered by that same
+     rule. That mismatch is what broke the card's visual hierarchy. */
+  .vendas-page .price{ justify-content: center; }
 
   /* Bigger breathing room where the layout felt cramped */
   .vendas-page .plan-card{ padding: clamp(32px,7vw,44px); }
