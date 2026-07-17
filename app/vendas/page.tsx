@@ -214,7 +214,11 @@ export default function VendasPage() {
     const els = rootRef.current?.querySelectorAll<HTMLElement>(".curtain");
     if (!els || els.length === 0) return;
     const reducedMq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reducedMq.matches) return;
+    // Desktop only — on mobile this is a scroll-triggered clip-path
+    // animation running on every section, which is exactly the kind of
+    // scroll-linked motion that made scrolling feel janky there.
+    const mobileMq = window.matchMedia("(max-width: 860px)");
+    if (reducedMq.matches || mobileMq.matches) return;
     const ctx = gsap.context(() => {
       els.forEach((el) => {
         gsap.fromTo(

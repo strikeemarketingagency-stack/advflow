@@ -287,9 +287,16 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
 
 @media (max-width: 860px) {.vendas-page .testi-grid{ grid-template-columns: 1fr; }
  }
-.vendas-page .reveal{ opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
-.vendas-page .reveal[data-revealed="true"]{ opacity: 1; transform: none; }
-.vendas-page .reveal-stagger > *{ transition-delay: calc(var(--i, 0) * 70ms); }
+@media (min-width: 861px){
+  .vendas-page .reveal{ opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+  .vendas-page .reveal[data-revealed="true"]{ opacity: 1; transform: none; }
+  .vendas-page .reveal-stagger > *{ transition-delay: calc(var(--i, 0) * 70ms); }
+}
+/* Mobile: same reasoning as the section-level reveal above — no
+   scroll-linked opacity/transform animation on individual elements either. */
+@media (max-width: 860px){
+  .vendas-page .reveal{ opacity: 1; transform: none; }
+}
 
 /* Full-page slides: every top-level section is one screen. Each one sits
    blurred/scaled-down/invisible until it becomes the active snapped slide,
@@ -337,18 +344,14 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
   }
   .vendas-page .wrap > section[data-slide-revealed="true"]{ opacity: 1; filter: blur(0); transform: scale(1); }
 }
-/* Mobile: same "materializes as it arrives" idea, but without the blur —
-   filter is one of the most expensive properties to repaint on mobile
-   GPUs, and animating it on every section while the user is actively
-   flinging the page is what made scrolling feel like it was stuttering.
-   Opacity + a small translateY is effectively free to composite, so the
-   scroll itself stays smooth while the reveal still reads as motion. */
-@media (prefers-reduced-motion: no-preference) and (max-width: 860px){
-  .vendas-page .wrap > section{
-    opacity: 0; transform: translateY(18px);
-    transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
-  }
-  .vendas-page .wrap > section[data-slide-revealed="true"]{ opacity: 1; transform: none; }
+/* Mobile: no scroll-linked animation at all — every section renders fully
+   visible immediately. The blur/fade-in-as-you-scroll effect above (and the
+   .reveal/.rule effects below) is a desktop-only flourish; on mobile it was
+   still doing work (opacity/transform toggling off an IntersectionObserver)
+   on every scroll tick, which is what read as the page stuttering / fighting
+   the scroll. Mobile now has zero animation tied to scroll position. */
+@media (max-width: 860px){
+  .vendas-page .wrap > section{ opacity: 1; filter: none; transform: none; transition: none; }
 }
 .vendas-page .spotlight{ position: relative; isolation: isolate; }
 .vendas-page .spotlight::before{ content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 0;
@@ -404,8 +407,8 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
 .vendas-page .badge{ align-self: center; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gold-bright);
   border: 1px solid var(--line-strong); background: rgba(217,167,90,0.06); border-radius: 999px;
   padding: 8px 18px; margin-bottom: 32px; }
-.vendas-page .display{ font-family: var(--font-heading); font-weight: 400; font-size: clamp(36px, 5vw, 64px);
-  line-height: 1.1; letter-spacing: -0.015em; max-width: 19ch; margin: 0 auto; }
+.vendas-page .display{ font-family: var(--font-heading); font-weight: 400; font-size: clamp(52px, 11vw, 128px);
+  line-height: 1.05; letter-spacing: -0.02em; max-width: 19ch; margin: 0 auto; text-align: center; }
 .vendas-page .display .glow{ background: linear-gradient(135deg, var(--gold-bright), var(--gold)); -webkit-background-clip: text;
   background-clip: text; color: transparent; }
 .vendas-page .hero .sub, .vendas-page .showcase .sub{ font-size: 19px; line-height: 1.65; max-width: 58ch; margin: 28px auto 0; color: var(--ink-dim); }
@@ -744,8 +747,10 @@ html.cursor-hover .cursor-dot{ opacity: 0; }
 /* Section dividers draw themselves in as they enter the viewport instead
    of just being static rules — a small, cheap (transform-only) touch that
    reinforces the "sequence of scenes" feel between sections. */
-.vendas-page .rule{ transform: scaleX(0); transform-origin: center; transition: transform 1s cubic-bezier(.16,1,.3,1); }
-.vendas-page .rule[data-revealed="true"]{ transform: scaleX(1); }
+@media (min-width: 861px){
+  .vendas-page .rule{ transform: scaleX(0); transform-origin: center; transition: transform 1s cubic-bezier(.16,1,.3,1); }
+  .vendas-page .rule[data-revealed="true"]{ transform: scaleX(1); }
+}
 @media (prefers-reduced-motion: reduce) {.vendas-page .rule{ transform: none; }
  }
 

@@ -55,6 +55,11 @@ export function SplitHeadline({ as = "h2", className, children }: SplitHeadlineP
   useEffect(() => {
     const el = ref.current;
     if (!el || reduced) return;
+    // Desktop only — this is a scroll-triggered animation (each word slides
+    // in as the heading crosses into view). On mobile it was one more
+    // scroll-linked effect contributing to the page feeling stuttery, so
+    // headings there just render fully in place with no motion.
+    if (window.matchMedia("(max-width: 860px)").matches) return;
     const words = el.querySelectorAll<HTMLElement>(".split-word-inner");
     if (!words.length) return;
     const ctx = gsap.context(() => {
