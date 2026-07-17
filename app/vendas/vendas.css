@@ -385,17 +385,7 @@ html:has(.vendas-page), body:has(.vendas-page){ background: #0a0908; overscroll-
 .vendas-page .display .glow{ background: linear-gradient(135deg, var(--gold-bright), var(--gold)); -webkit-background-clip: text;
   background-clip: text; color: transparent; }
 .vendas-page .hero .sub, .vendas-page .showcase .sub{ font-size: 19px; line-height: 1.65; max-width: 58ch; margin: 28px auto 0; color: var(--ink-dim); }
-.vendas-page .showcase{ padding: clamp(40px,7vw,80px) 0; text-align: center; position: relative; }
-/* Mirrors the fade at the bottom of .hero-bg-layer: that one fades the
-   gold wave down to the dark page bg by the end of slide 1, this one
-   fades the same dark tone back in at the very top of slide 2 — so
-   neither edge of the hand-off shows a bare color/tone jump. Kept short
-   (18% of the section) and under the same z-index:1 as the rest of the
-   content (below) so it can never sit on top of the subheadline/CTA/frame,
-   which all sit further down, vertically centered in the section. */
-.vendas-page .showcase::before{ content: ""; position: absolute; top: 0; left: 0; right: 0; height: 18%;
-  background: linear-gradient(to bottom, var(--bg), transparent); pointer-events: none; z-index: 0; }
-.vendas-page .showcase > *{ position: relative; z-index: 1; }
+.vendas-page .showcase{ padding: clamp(40px,7vw,80px) 0; text-align: center; }
 .vendas-page .showcase .row, .vendas-page .hero .row{ display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 38px; }
 .vendas-page .frame-wrap{ max-width: 980px; margin: 64px auto 0; position: relative; }
 .vendas-page .frame-glow{ position: absolute; inset: -40px; background: radial-gradient(600px 300px at 50% 20%, rgba(217,167,90,0.22), transparent 70%); filter: blur(10px); z-index: 0; }
