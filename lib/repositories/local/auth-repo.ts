@@ -85,6 +85,20 @@ class LocalAuthRepository implements AuthRepository {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
+
+  async requestPasswordReset(): Promise<void> {
+    throw new RepoError(
+      "not_implemented",
+      "Recuperação de senha não está disponível no modo de demonstração."
+    );
+  }
+
+  async updatePassword(): Promise<void> {
+    throw new RepoError(
+      "not_implemented",
+      "Recuperação de senha não está disponível no modo de demonstração."
+    );
+  }
 }
 
 export const localAuthRepo = new LocalAuthRepository();

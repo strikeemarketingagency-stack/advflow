@@ -45,6 +45,15 @@ export class SupabaseAuthRepository implements AuthRepository {
         "Verifique seu email para confirmar a conta antes de entrar."
       );
     }
+    // Cria a linha em `perfis` (extensão do usuário: plano/assinatura) logo
+    // após o signUp ter sucesso — RLS em `perfis` já permite isso porque a
+    // sessão do usuário recém-criado está ativa neste ponto (auth.uid()
+    // bate com o id que está sendo inserido). Nome/OAB/etc do escritório são
+    // coletados depois no onboarding (tabela `office`), não aqui.
+    const { error: perfilError } = await supabase
+      .from("perfis")
+      .insert({ id: data.user.id, plano: "basico" });
+    if (perfilError) throw new RepoError("supabase_error", perfilError.message);
     mirrorSession(data.session);
     return toAuthSession(data.user);
   }
@@ -73,6 +82,20 @@ export class SupabaseAuthRepository implements AuthRepository {
       listener(session ? toAuthSession(session.user) : null);
     });
     return () => subscription.unsubscribe();
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    if (error) throw new RepoError("supabase_error", error.message);
+  }
+
+  async updatePassword(newPassword: string): Promise<void> {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw new RepoError("supabase_error", error.message);
   }
 }
 

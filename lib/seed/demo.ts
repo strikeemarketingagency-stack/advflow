@@ -1,4 +1,5 @@
-import { authRepo, RepoError } from "@/lib/repositories";
+import { localAuthRepo } from "@/lib/repositories/local/auth-repo";
+import { RepoError } from "@/lib/repositories/types";
 import { writeJson, newId, nowIso } from "@/lib/repositories/local/json-store";
 import { userKey } from "@/lib/repositories/local/storage-keys";
 import { builtinTemplates } from "@/lib/seed/templates";
@@ -58,13 +59,20 @@ function buildActivity(userId: string, type: ActivityType, message: string, crea
   return { id: newId(), userId, type, message, entityId: null, createdAt };
 }
 
+// Sempre usa o backend local (localAuthRepo), nunca o authRepo trocável de
+// lib/repositories — a demo é uma vitrine estática e independe de
+// NEXT_PUBLIC_DATA_BACKEND. Sem isso, uma vez os outros repos migrando pra
+// Supabase, seedDemoData (que escreve direto no localStorage via writeJson)
+// ficaria "invisível": a sessão autenticaria contra o Postgres normalmente,
+// mas clientRepo/templateRepo/etc já não leriam mais do localStorage onde os
+// dados fictícios foram gravados.
 async function ensureDemoSession(): Promise<string> {
   try {
-    const session = await authRepo.signUp(DEMO_EMAIL, DEMO_PASSWORD);
+    const session = await localAuthRepo.signUp(DEMO_EMAIL, DEMO_PASSWORD);
     return session.user.id;
   } catch (err) {
     if (err instanceof RepoError && err.code === "email_taken") {
-      const session = await authRepo.signIn(DEMO_EMAIL, DEMO_PASSWORD);
+      const session = await localAuthRepo.signIn(DEMO_EMAIL, DEMO_PASSWORD);
       return session.user.id;
     }
     throw err;

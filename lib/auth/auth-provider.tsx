@@ -11,6 +11,8 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -48,8 +50,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await authRepo.signOut();
   }, []);
 
+  const requestPasswordReset = React.useCallback(async (email: string) => {
+    await authRepo.requestPasswordReset(email);
+  }, []);
+
+  const updatePassword = React.useCallback(async (newPassword: string) => {
+    await authRepo.updatePassword(newPassword);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ session, status, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{ session, status, signIn, signUp, signOut, requestPasswordReset, updatePassword }}
+    >
       {children}
     </AuthContext.Provider>
   );

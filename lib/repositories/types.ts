@@ -29,6 +29,10 @@ export interface AuthRepository {
   signIn(email: string, password: string): Promise<AuthSession>;
   signOut(): Promise<void>;
   onAuthStateChange(listener: AuthStateListener): () => void;
+  /** Dispara o email de "esqueci minha senha". Sem-op útil (throw) no backend mock. */
+  requestPasswordReset(email: string): Promise<void>;
+  /** Define uma nova senha — só válido dentro da sessão de recovery criada pelo link do email. */
+  updatePassword(newPassword: string): Promise<void>;
 }
 
 // ---------- Office / lawyer profile ----------
@@ -230,7 +234,13 @@ export interface StoredFile {
 }
 
 export interface StorageRepository {
-  upload(file: File | Blob, name: string, mimeType: string): Promise<StoredFile>;
+  /**
+   * `visibility` só é significativo no backend Supabase (escolhe o bucket
+   * público vs. privado) — o backend local ignora e sempre guarda no mesmo
+   * IndexedDB. Default "private": qualquer chamador que não passar nada
+   * continua tão restrito quanto antes.
+   */
+  upload(file: File | Blob, name: string, mimeType: string, visibility?: "public" | "private"): Promise<StoredFile>;
   getUrl(fileId: ID): Promise<string | null>;
   getBlob(fileId: ID): Promise<Blob | null>;
   remove(fileId: ID): Promise<void>;

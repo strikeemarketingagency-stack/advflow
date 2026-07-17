@@ -96,6 +96,9 @@ export default function LoginPage() {
                 {...register("password")}
               />
             </Field>
+            <Link href="/esqueci-senha" className="-mt-2 self-end text-xs text-mist-300 hover:text-gold-400 hover:underline">
+              Esqueci minha senha
+            </Link>
             <Button type="submit" size="lg" variant="gold" className="mt-2" loading={submitting}>
               Entrar
             </Button>

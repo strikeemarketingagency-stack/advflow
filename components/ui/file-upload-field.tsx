@@ -36,7 +36,7 @@ function FileUploadField({ label, fileId, onChange, accept = "image/*", hint, sh
   const handleFile = async (file: File) => {
     setLoading(true);
     try {
-      const stored = await storageRepo.upload(file, file.name, file.type);
+      const stored = await storageRepo.upload(file, file.name, file.type, "public");
       onChange(stored.id);
     } finally {
       setLoading(false);
